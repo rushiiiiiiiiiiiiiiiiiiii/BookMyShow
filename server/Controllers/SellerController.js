@@ -1,7 +1,7 @@
 const Seller = require("../Schemas/Seller");
 const Booking = require('../Schemas/Booking')
 const otpStore = require("../utils/sellerOtpStore");
-const transporter = require("../utils/mail");
+const transporter = require("../utils/Mail");
 const jwt = require("jsonwebtoken");
 
 // 📌 SEND OTP
