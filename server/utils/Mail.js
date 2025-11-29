@@ -2,10 +2,9 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  requireTLS: true,
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false, // Must be false for 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -13,11 +12,13 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false,
   },
-  connectionTimeout: 20000,
-  socketTimeout: 20000,
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 60000,
 });
 
 module.exports = transporter;
+
 
 // const nodemailer = require("nodemailer");
 // require("dotenv").config();

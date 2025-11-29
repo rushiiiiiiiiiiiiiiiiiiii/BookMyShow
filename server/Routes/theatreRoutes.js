@@ -38,6 +38,7 @@ const {
   getBooking,
 } = require("../Controllers/bookingController");
 const authMiddleware = require("../Middlewears/authMiddleware");
+const { testMail } = require("../Controllers/testMail");
 /* ============================
    ✅ THEATRE ROUTES
 ============================ */
@@ -76,5 +77,9 @@ router.get("/shows/:id", getShowById);
 router.post("/booking", authMiddleware, createBooking);
 router.get("/my-bookings", authMiddleware, getMyBookings);
 router.get("/booking/:id", authMiddleware, getBooking);
+
+
+
+router.get("/test-mail", testMail);
 
 module.exports = router;
