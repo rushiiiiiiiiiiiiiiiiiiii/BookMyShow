@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { sendOtp, verifyOtp, onboard, getMe, getSellerBookings} = require("../controllers/sellerController");
+const { sendOtp, verifyOtp, onboard, getMe, getSellerBookings} = require("../Controllers/SellerController");
 const authMiddleware = require("../Middlewears/authMiddleware");
 
 router.post("/send-otp", sendOtp);
