@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 
 require("dotenv").config();
 const Authrouter = require("./Routes/UserRoutes");
-const transporter = require("./utils/Mail");
+// const transporter = require("./utils/Mail");
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -29,21 +29,21 @@ app.use("/auth", Authrouter);
 app.use("/api/seller", require("./Routes/SellerRoutes"));
 
 
-app.get("/test-mail", async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: "rushikesharote14@gmail.com",
-      subject: "OTP Test",
-      text: "Brevo SMTP Working ✅"
-    });
+// app.get("/test-mail", async (req, res) => {
+//   try {
+//     await transporter.sendMail({
+//       from: process.env.SMTP_USER,
+//       to: "rushikesharote14@gmail.com",
+//       subject: "OTP Test",
+//       text: "Brevo SMTP Working ✅"
+//     });
 
-    res.send("Email Sent ✅");
-  } catch (err) {
-    console.error(err);
-    res.status(500).json(err);
-  }
-});
+//     res.send("Email Sent ✅");
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json(err);
+//   }
+// });
 
 app.listen(process.env.PORT, () => {
   console.log(`Server Started on PORT ${process.env.PORT}`);
