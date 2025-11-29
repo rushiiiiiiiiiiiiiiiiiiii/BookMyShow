@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
   async function apiSendOtp(identifier) {
     try {
-      const res = await fetch("http://localhost:8000/auth/send-otp", {
+      const res = await fetch("https://bookmyshow-backend-mzd2.onrender.com/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: identifier }),
@@ -65,7 +65,7 @@ export default function RegisterPage() {
 
   async function apiVerifyOtp(identifier, code) {
     try {
-      const res = await fetch("http://localhost:8000/auth/verify-otp", {
+      const res = await fetch("https://bookmyshow-backend-mzd2.onrender.com/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

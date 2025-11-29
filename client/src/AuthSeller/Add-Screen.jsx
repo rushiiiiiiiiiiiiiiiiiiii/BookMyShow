@@ -36,7 +36,7 @@ export default function AddScreen() {
     };
 
     const res = await axios.post(
-      `http://localhost:8000/api/seller/screen/${theatreId}`,
+      `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screen/${theatreId}`,
       payload
     );
 
@@ -58,7 +58,6 @@ export default function AddScreen() {
           <h2 className="text-xl font-bold text-[#f84464] mb-6">Add Screen</h2>
 
           <div className="grid grid-cols-2 gap-4">
-
             <input
               name="name"
               placeholder="Screen Name (Audi 1)"
@@ -112,7 +111,6 @@ export default function AddScreen() {
               <option>Dolby Atmos</option>
               <option>DTS</option>
             </select>
-
           </div>
 
           <button
@@ -121,7 +119,6 @@ export default function AddScreen() {
           >
             Save Screen
           </button>
-
         </main>
       </div>
     </div>

@@ -29,14 +29,13 @@ export default function ShowsList() {
     try {
       setLoading(true);
       const url = theatreId
-        ? `http://localhost:8000/api/seller/shows/${theatreId}`
-        : `http://localhost:8000/api/seller/shows`;
+        ? `https://bookmyshow-backend-mzd2.onrender.com/api/seller/shows/${theatreId}`
+        : `https://bookmyshow-backend-mzd2.onrender.com/api/seller/shows`;
 
       const res = await axios.get(url);
 
       if (res.data.ok) setShows(res.data.shows);
       else setError("Failed to load shows");
-
     } catch (err) {
       console.error(err);
       setError("Server error");
@@ -53,7 +52,7 @@ export default function ShowsList() {
 
   // ✅ DELETE CONFIRMED
   async function confirmCancel() {
-    await axios.delete(`http://localhost:8000/api/seller/show/${selectedShow._id}`);
+    await axios.delete(`https://bookmyshow-backend-mzd2.onrender.com/api/seller/show/${selectedShow._id}`);
     setShowModal(false);
     setSelectedShow(null);
     loadShows();
@@ -69,7 +68,7 @@ export default function ShowsList() {
   async function confirmUpdate() {
     try {
       await axios.put(
-        `http://localhost:8000/api/seller/show/${editData._id}`,
+        `https://bookmyshow-backend-mzd2.onrender.com/api/seller/show/${editData._id}`,
         {
           movie: editData.movie,
           time: editData.time,
@@ -105,14 +104,12 @@ export default function ShowsList() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-
       <SellerSidebar />
 
       <div className="flex-1 flex flex-col">
         <SellerNavbar />
 
         <main className="p-6 max-w-7xl mx-auto w-full">
-
           <h2 className="text-2xl font-bold mb-6">
             {theatreId ? "Theatre Shows" : "All Shows"}
           </h2>
@@ -141,9 +138,7 @@ export default function ShowsList() {
           {/* TABLE */}
           {!loading && shows.length > 0 && (
             <div className="bg-white shadow rounded overflow-x-auto">
-
               <table className="w-full text-sm border-collapse">
-
                 <thead className="bg-gray-100">
                   <tr className="text-left">
                     <th className="p-3">Movie</th>
@@ -161,13 +156,14 @@ export default function ShowsList() {
                 <tbody>
                   {shows.map((s) => (
                     <tr key={s._id} className="border-t hover:bg-gray-50">
-
                       <td className="p-3">{s.movie}</td>
 
                       <td className="p-3">
                         {s.language} / {s.format}
                         {s.isSubtitled && (
-                          <span className="ml-1 text-xs text-blue-600">(Sub)</span>
+                          <span className="ml-1 text-xs text-blue-600">
+                            (Sub)
+                          </span>
                         )}
                       </td>
 
@@ -187,7 +183,6 @@ export default function ShowsList() {
                       <td className="p-3">{badge(s.status)}</td>
 
                       <td className="p-3 flex justify-center gap-3">
-
                         {/* EDIT */}
                         <button
                           onClick={() => openEditModal(s)}
@@ -205,41 +200,43 @@ export default function ShowsList() {
                             <Trash2 size={16} />
                           </button>
                         )}
-
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
-
               </table>
-
             </div>
           )}
-
         </main>
       </div>
 
       {/* ✅ DELETE MODAL */}
       {showModal && selectedShow && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-
             <div className="flex justify-between">
               <h3 className="font-semibold">Cancel Show?</h3>
-              <button onClick={() => setShowModal(false)}><X size={18} /></button>
+              <button onClick={() => setShowModal(false)}>
+                <X size={18} />
+              </button>
             </div>
 
             <p className="mt-3">{selectedShow.movie}</p>
 
             <div className="flex justify-end gap-3 mt-5">
-              <button onClick={() => setShowModal(false)} className="border px-4 py-2">No</button>
-              <button onClick={confirmCancel} className="bg-red-600 text-white px-4 py-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="border px-4 py-2"
+              >
+                No
+              </button>
+              <button
+                onClick={confirmCancel}
+                className="bg-red-600 text-white px-4 py-2"
+              >
                 Yes
               </button>
             </div>
-
           </div>
         </div>
       )}
@@ -247,18 +244,20 @@ export default function ShowsList() {
       {/* ✅ EDIT MODAL */}
       {editModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-
             <div className="flex justify-between">
               <h3 className="font-semibold">Edit Show</h3>
-              <button onClick={() => setEditModal(false)}><X size={18} /></button>
+              <button onClick={() => setEditModal(false)}>
+                <X size={18} />
+              </button>
             </div>
 
             <input
               className="border p-2 w-full mt-3"
               value={editData.movie || ""}
-              onChange={e => setEditData({ ...editData, movie: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, movie: e.target.value })
+              }
               placeholder="Movie name"
             />
 
@@ -266,14 +265,18 @@ export default function ShowsList() {
               type="time"
               className="border p-2 w-full mt-3"
               value={editData.time || ""}
-              onChange={e => setEditData({ ...editData, time: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, time: e.target.value })
+              }
             />
 
             <input
               type="number"
               className="border p-2 w-full mt-3"
               value={editData.durationMinutes || ""}
-              onChange={e => setEditData({ ...editData, durationMinutes: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, durationMinutes: e.target.value })
+              }
               placeholder="Duration (minutes)"
             />
 
@@ -281,32 +284,40 @@ export default function ShowsList() {
               type="number"
               className="border p-2 w-full mt-3"
               value={editData.price || ""}
-              onChange={e => setEditData({ ...editData, price: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, price: e.target.value })
+              }
               placeholder="Ticket price"
             />
 
             <select
               className="border p-2 w-full mt-3"
               value={editData.status || "active"}
-              onChange={e => setEditData({ ...editData, status: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, status: e.target.value })
+              }
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
 
             <div className="flex justify-end gap-3 mt-5">
-              <button onClick={() => setEditModal(false)} className="border px-4 py-2">
+              <button
+                onClick={() => setEditModal(false)}
+                className="border px-4 py-2"
+              >
                 Cancel
               </button>
-              <button onClick={confirmUpdate} className="bg-[#f84464] text-white px-4 py-2">
+              <button
+                onClick={confirmUpdate}
+                className="bg-[#f84464] text-white px-4 py-2"
+              >
                 Save Changes
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

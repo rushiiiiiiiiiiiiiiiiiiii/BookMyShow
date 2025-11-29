@@ -12,14 +12,14 @@ export default function UserShows() {
   }, [city]);
 
   async function loadShows() {
-    const res = await axios.get(`http://localhost:8000/api/shows-city?city=${city}`);
+    const res = await axios.get(`https://bookmyshow-backend-mzd2.onrender.com/api/shows-city?city=${city}`);
     if (res.data.ok) setShows(res.data.shows);
   }
 
   // Group by movie + theatre
   const grouped = {};
 
-  shows.forEach(show => {
+  shows.forEach((show) => {
     const key = `${show.movie}-${show.theatreId.name}`;
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(show);
@@ -30,19 +30,15 @@ export default function UserShows() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto p-6">
-
-        <h2 className="text-2xl font-bold mb-4">
-          Movies in {city}
-        </h2>
+        <h2 className="text-2xl font-bold mb-4">Movies in {city}</h2>
 
         {Object.entries(grouped).map(([key, list]) => (
           <div key={key} className="bg-white rounded-lg shadow mb-4 p-4">
-
             <h4 className="font-bold">{list[0].movie}</h4>
             <p className="text-sm text-gray-500">{list[0].theatreId.name}</p>
 
             <div className="flex gap-2 mt-2">
-              {list.map(s => (
+              {list.map((s) => (
                 <a
                   key={s._id}
                   href={`/seat/${s._id}`}
@@ -52,10 +48,8 @@ export default function UserShows() {
                 </a>
               ))}
             </div>
-
           </div>
         ))}
-
       </div>
     </>
   );

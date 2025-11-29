@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Components/Navbar";
 import { useNavigate } from "react-router-dom";
-import {toast} from 'react-hot-toast'
+import { toast } from "react-hot-toast";
 // --- Colors ---
 const BMS_GREEN = "#1FA85D";
 const BMS_BTN = "bg-[#f84464] hover:bg-[#e43a57]";
@@ -48,7 +48,7 @@ export default function SeatPage() {
       try {
         // ✅ MOVIE DETAILS
         const showRes = await axios.get(
-          `http://localhost:8000/api/shows/${id}`
+          `https://bookmyshow-backend-mzd2.onrender.com/api/shows/${id}`
         );
 
         if (showRes.data.ok) {
@@ -57,7 +57,7 @@ export default function SeatPage() {
 
         // ✅ SEAT DATA
         const seatRes = await axios.get(
-          `http://localhost:8000/api/user/seats/${id}`
+          `https://bookmyshow-backend-mzd2.onrender.com/api/user/seats/${id}`
         );
 
         if (seatRes.data.ok) {
@@ -306,4 +306,3 @@ function Seat({ id, booked, selected, toggleSeat }) {
     </div>
   );
 }
-
