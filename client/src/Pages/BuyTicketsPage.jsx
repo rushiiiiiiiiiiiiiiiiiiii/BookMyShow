@@ -18,7 +18,7 @@ export default function BuyTicketsPage() {
     async function load() {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/shows/movie?movie=${encodeURIComponent(decodedName)}`
+          `https://bookmyshow-backend-mzd2.onrender.com/api/shows/movie?movie=${encodeURIComponent(decodedName)}`
         );
 
         if (res.data.ok) {
@@ -48,7 +48,6 @@ export default function BuyTicketsPage() {
       {/* MOVIE HEADER */}
       <div className="bg-white w-[95%] m-auto">
         <div className="max-w-7xl mx-auto px-4 py-4 flex gap-5">
-
           {/* POSTER */}
           {filteredShows[0]?.poster && (
             <img
@@ -92,10 +91,11 @@ export default function BuyTicketsPage() {
                 key={date}
                 onClick={() => setActiveDate(date)}
                 className={`min-w-[70px] h-[56px] rounded-lg text-sm flex flex-col items-center justify-center
-                ${isActive
+                ${
+                  isActive
                     ? "bg-[#f84464] text-white"
                     : "bg-gray-100 hover:bg-gray-200"
-                  }
+                }
                 `}
               >
                 <div className="font-bold">
@@ -123,38 +123,33 @@ export default function BuyTicketsPage() {
 
       {/* SHOW LIST */}
       <div className="max-w-7xl mx-auto px-4 pb-24 space-y-5 w-[95%] m-auto">
-
         {filteredShows.map((show) => (
-          <div key={show._id} className="bg-white rounded-xl px-4 py-3 shadow-sm">
-
+          <div
+            key={show._id}
+            className="bg-white rounded-xl px-4 py-3 shadow-sm"
+          >
             {/* THEATRE INFO */}
             <div className="flex justify-between items-start">
-
               <div>
                 <h3 className="font-semibold text-[15px] flex items-center gap-1">
                   <MapPin size={14} /> {show.theatreId.name}
                 </h3>
 
-                <p className="text-xs text-gray-500">
-                  {show.screenId.name}
-                </p>
+                <p className="text-xs text-gray-500">{show.screenId.name}</p>
 
                 <p className="text-xs text-gray-400 mt-[2px]">
                   {show.language} · {show.format} · {show.certificate}
                   {show.isSubtitled && " · Subs"}
                 </p>
-
               </div>
 
               <div className="text-xs text-green-600 font-semibold">
                 {show.status.toUpperCase()}
               </div>
-
             </div>
 
             {/* TIME */}
             <div className="mt-3 flex items-center gap-5">
-
               <button
                 onClick={() => navigate(`/seats/${show._id}`)}
                 className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-semibold hover:bg-green-50"
@@ -168,11 +163,8 @@ export default function BuyTicketsPage() {
                 </span>
               )}
 
-              <span className="ml-auto text-sm font-bold">
-                ₹ {show.price}
-              </span>
+              <span className="ml-auto text-sm font-bold">₹ {show.price}</span>
             </div>
-
           </div>
         ))}
 
@@ -181,7 +173,6 @@ export default function BuyTicketsPage() {
             No shows available for this date
           </div>
         )}
-
       </div>
     </div>
   );

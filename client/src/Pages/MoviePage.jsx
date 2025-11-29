@@ -18,9 +18,7 @@ export default function MoviePage() {
   useEffect(() => {
     async function load() {
       const res = await axios.get(
-        `http://localhost:8000/api/shows/movie?movie=${encodeURIComponent(
-          movieName
-        )}`
+        `https://bookmyshow-backend-mzd2.onrender.com/api/shows/movie?movie=${encodeURIComponent(movieName)}`
       );
 
       if (res.data.ok && res.data.shows.length > 0) {
@@ -190,7 +188,11 @@ export default function MoviePage() {
                 <h4 className="font-semibold">{r.user}</h4>
                 <div className="flex">
                   {[...Array(r.rating)].map((_, i) => (
-                    <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
+                    <Star
+                      key={i}
+                      size={14}
+                      className="text-yellow-400 fill-yellow-400"
+                    />
                   ))}
                 </div>
               </div>
@@ -199,7 +201,7 @@ export default function MoviePage() {
           ))}
         </div>
       </div>
-        {/* UPCOMING */}
+      {/* UPCOMING */}
       <div className="max-w-7xl mx-auto px-6 mb-10 mt-12">
         <h2 className="text-xl font-bold mb-4">Upcoming Movies</h2>
 

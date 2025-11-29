@@ -10,7 +10,7 @@ export default function MyBookingsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await axios.get("http://localhost:8000/api/my-bookings", {
+        const res = await axios.get("https://bookmyshow-backend-mzd2.onrender.com/api/my-bookings", {
           withCredentials: true,
         });
         setBookings(res.data.bookings || []);

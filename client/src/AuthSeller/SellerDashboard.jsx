@@ -31,16 +31,16 @@ export default function SellerDashboard() {
   async function loadStats() {
     try {
       const theatres = await axios.get(
-        "http://localhost:8000/api/seller/theatres"
+        "https://bookmyshow-backend-mzd2.onrender.com/api/seller/theatres"
       );
       const screens = await axios.get(
-        "http://localhost:8000/api/seller/screens"
+        "https://bookmyshow-backend-mzd2.onrender.com/api/seller/screens"
       );
-      const shows = await axios.get("http://localhost:8000/api/seller/shows");
+      const shows = await axios.get("https://bookmyshow-backend-mzd2.onrender.com/api/seller/shows");
 
       // ✅ NEW: Fetch Seller Bookings
       const bookings = await axios.get(
-        "http://localhost:8000/api/seller/bookings"
+        "https://bookmyshow-backend-mzd2.onrender.com/api/seller/bookings"
       );
 
       setStats({

@@ -80,7 +80,7 @@ export default function AddTheatre() {
         },
       };
 
-      const res = await axios.post("http://localhost:8000/api/seller/theatre", payload);
+      const res = await axios.post("https://bookmyshow-backend-mzd2.onrender.com/api/seller/theatre", payload);
 
       if (res.data.ok) {
         toast.success("Theatre added successfully ✅");
