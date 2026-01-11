@@ -6,7 +6,7 @@ const {
   getMyBookings,
   getBooking,
   lockSeats,
-} = require("../Controllers/BookingController");
+} = require("../Controllers/bookingController");
 
 router.post("/lock-seats", authMiddleware, lockSeats);
 
