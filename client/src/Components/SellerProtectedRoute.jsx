@@ -35,7 +35,7 @@ export default function SellerProtectedRoute({ children }) {
   if (status.loading) return null;
 
   if (!status.ok) {
-    return <Navigate to="/seller/login" replace />;
+    return <Navigate to="/seller/signin" replace />;
   }
 
   return children;

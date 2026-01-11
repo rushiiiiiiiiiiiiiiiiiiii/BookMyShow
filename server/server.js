@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const Conn = require("./Connection/Conn");
 const cookieParser = require("cookie-parser");
-    
 
 const Authrouter = require("./Routes/UserRoutes");
 // const transporter = require("./utils/Mail");
@@ -14,9 +13,9 @@ app.use(cookieParser());
 app.set("trust proxy", 1);
 app.use(
   cors({
-    origin:[
-       "http://localhost:5173",
-       "https://book-my-show-frontend-ashen.vercel.app",
+    origin: [
+      "http://localhost:5173",
+      "https://book-my-show-frontend-ashen.vercel.app",
     ],
     credentials: true,
   })
@@ -33,7 +32,6 @@ app.use("/api", require("./Routes/BookingRoutes"));
 app.use("/api/admin", require("./Routes/AdminRoutes"));
 app.use("/auth", Authrouter);
 app.use("/api/seller", require("./Routes/SellerRoutes"));
-
 
 // app.get("/test-mail", async (req, res) => {
 //   try {

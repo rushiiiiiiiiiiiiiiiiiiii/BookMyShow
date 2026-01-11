@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-hot-toast";
 export default function SellerLogin() {
   const [email, setEmail] = useState("");
   const [otpScreen, setOtpScreen] = useState(false);
@@ -10,10 +10,13 @@ export default function SellerLogin() {
   const navigate = useNavigate();
 
   async function sendOtp() {
-    if (!email.trim()) return toast.succes("Enter business email");
+    if (!email.trim()) return toast.success("Enter business email");
     try {
       setLoading(true);
-      const res = await axios.post("/api/seller/send-otp", { email });
+      const res = await axios.post(
+        "https://bookmyshow-backend-mzd2.onrender.com/api/seller/send-otp",
+        { email }
+      );
       setLoading(false);
       if (res.data.ok) setOtpScreen(true);
       else toast.succes(res.data.message || "Failed to send OTP");

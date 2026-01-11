@@ -40,6 +40,7 @@ exports.sendOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    console.log(email,otp)
 
     if (!email || !otp)
       return res
@@ -73,7 +74,7 @@ exports.verifyOtp = async (req, res) => {
 
     res
       .cookie("seller_token", token, {
-        // //production
+        //production
         httpOnly: true,
         secure: true,
         sameSite: "none",
@@ -86,7 +87,7 @@ exports.verifyOtp = async (req, res) => {
         // secure: false,
         // sameSite: "lax",
         // path: "/",
-        // partitioned: true,
+        // // partitioned: true,
         // maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ ok: true, isNewSeller });
