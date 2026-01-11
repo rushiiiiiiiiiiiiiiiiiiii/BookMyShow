@@ -45,6 +45,11 @@ const ScreenSchema = new mongoose.Schema(
       enum: ["Dolby 7.1", "Dolby Atmos", "DTS"],
       default: "Dolby 7.1",
     },
+    status: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active",
+    },
   },
   { timestamps: true }
 );

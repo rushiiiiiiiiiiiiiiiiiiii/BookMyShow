@@ -16,7 +16,7 @@ export default function SellerBookings() {
 
   async function loadBookings() {
     try {
-      const res = await axios.get("https://bookmyshow-backend-mzd2.onrender.com/api/seller/bookings");
+      const res = await axios.get("http://localhost:8000/api/seller/bookings");
       if (res.data.ok) setBookings(res.data.bookings);
     } catch (err) {
       console.error(err);
@@ -59,11 +59,9 @@ export default function SellerBookings() {
                 />
 
                 <div className="flex-1">
-
                   <h3 className="font-bold text-lg">{b.movie}</h3>
 
                   <div className="text-sm text-gray-600 mt-2 space-y-1">
-
                     <div className="flex gap-2 items-center">
                       <MapPin size={14} />
                       {b.theatre?.name} · {b.screen?.name}
@@ -80,20 +78,15 @@ export default function SellerBookings() {
                     </div>
                   </div>
 
-                  <div className="mt-2 font-bold">
-                    ₹ {b.amount}
-                  </div>
-
+                  <div className="mt-2 font-bold">₹ {b.amount}</div>
                 </div>
 
                 <span className="px-3 py-1 text-xs h-fit rounded-full bg-green-100 text-green-600">
                   {b.status}
                 </span>
-
               </div>
             ))}
           </div>
-
         </div>
       </div>
     </div>

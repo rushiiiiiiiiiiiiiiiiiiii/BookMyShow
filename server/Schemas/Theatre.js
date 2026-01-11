@@ -40,10 +40,10 @@ const TheatreSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "blocked"],
+      enum: ["approved", "blocked"],
       default: "approved",
+      index: true,
     },
-
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -25,6 +25,8 @@ app.get("/", (req, res) => {
   res.send("Working Fine");
 });
 app.use("/api", require("./Routes/theatreRoutes"));
+app.use("/api", require("./Routes/BookingRoutes"));
+app.use("/api/admin", require("./Routes/AdminRoutes"));
 app.use("/auth", Authrouter);
 app.use("/api/seller", require("./Routes/SellerRoutes"));
 

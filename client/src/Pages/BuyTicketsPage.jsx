@@ -18,7 +18,9 @@ export default function BuyTicketsPage() {
     async function load() {
       try {
         const res = await axios.get(
-          `https://bookmyshow-backend-mzd2.onrender.com/api/shows/movie?movie=${encodeURIComponent(decodedName)}`
+          `http://localhost:8000/api/shows/movie?movie=${encodeURIComponent(
+            decodedName
+          )}`
         );
 
         if (res.data.ok) {

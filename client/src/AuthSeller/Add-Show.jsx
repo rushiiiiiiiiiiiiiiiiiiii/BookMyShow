@@ -64,7 +64,7 @@ export default function AddShow() {
   async function loadScreens() {
     try {
       const res = await axios.get(
-        `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screens/${theatreId}`
+        `http://localhost:8000/api/seller/screens/${theatreId}`
       );
       if (res.data.ok) setScreens(res.data.screens);
     } catch {
@@ -128,7 +128,7 @@ export default function AddShow() {
       setLoading(true);
 
       const res = await axios.post(
-        `https://bookmyshow-backend-mzd2.onrender.com/api/seller/show/${theatreId}`,
+        `http://localhost:8000/api/seller/show/${theatreId}`,
         form
       );
 
@@ -310,7 +310,7 @@ export default function AddShow() {
               className="border p-2 rounded"
             />
 
-            <div className="col-span-2 flex items-center gap-4">
+            <div classivName="col-span-2 flex items-center gap-4">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"

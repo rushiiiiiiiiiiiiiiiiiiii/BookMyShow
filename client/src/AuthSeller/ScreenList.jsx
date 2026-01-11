@@ -3,7 +3,12 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import SellerNavbar from "../Components/Navbar";
 import SellerSidebar from "../Components/SellerSidebar";
-import { PlusCircle, Trash2, X, Pencil } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  X,
+  Pencil,
+} from "lucide-react";
 
 axios.defaults.withCredentials = true;
 
@@ -33,8 +38,8 @@ export default function ScreenList() {
       setError("");
 
       const url = theatreId
-        ? `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screens/${theatreId}`
-        : `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screens`;
+        ? `http://localhost:8000/api/seller/screens/${theatreId}`
+        : `http://localhost:8000/api/seller/screens`;
 
       const res = await axios.get(url);
 
@@ -50,32 +55,42 @@ export default function ScreenList() {
     }
   }
 
-  // ✅ OPEN DELETE MODAL
+  function statusBadge(status) {
+    return status === "blocked" ? (
+      <span className="text-xs px-2 py-1 rounded bg-red-100 text-red-600">
+        BLOCKED
+      </span>
+    ) : (
+      <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700">
+        ACTIVE
+      </span>
+    );
+  }
+
+  // DELETE
   function openDeleteModal(screen) {
     setSelectedScreen(screen);
     setConfirmModal(true);
   }
 
-  // ✅ DELETE CONFIRMED
   async function confirmDelete() {
     await axios.delete(
-      `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screen/${selectedScreen._id}`
+      `http://localhost:8000/api/seller/screen/${selectedScreen._id}`
     );
     setConfirmModal(false);
     setSelectedScreen(null);
     loadScreens();
   }
 
-  // ✅ OPEN EDIT MODAL
+  // EDIT
   function openEditModal(screen) {
     setEditData({ ...screen });
     setEditModal(true);
   }
 
-  // ✅ UPDATE CONFIRMED
   async function confirmUpdate() {
     await axios.put(
-      `https://bookmyshow-backend-mzd2.onrender.com/api/seller/screen/${editData._id}`,
+      `http://localhost:8000/api/seller/screen/${editData._id}`,
       editData
     );
     setEditModal(false);
@@ -90,7 +105,6 @@ export default function ScreenList() {
         <SellerNavbar />
 
         <main className="p-6 max-w-7xl mx-auto w-full">
-          {/* HEADER */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">
               {theatreId ? "Theatre Screens" : "All Screens"}
@@ -107,74 +121,94 @@ export default function ScreenList() {
             )}
           </div>
 
-          {/* LOADING */}
           {loading && <p className="text-gray-500">Loading screens...</p>}
-
-          {/* ERROR */}
           {error && <p className="text-red-500">{error}</p>}
 
-          {/* EMPTY */}
           {!loading && screens.length === 0 && !error && (
             <div className="bg-white p-8 rounded text-center">
               No screens created yet.
             </div>
           )}
 
-          {/* GRID */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {screens.map((s) => (
-              <div key={s._id} className="bg-white p-5 rounded-lg shadow">
-                <h3 className="font-semibold text-lg">{s.name}</h3>
+            {screens.map((s) => {
+              const isBlocked = s.status === "blocked";
 
-                <p className="text-sm text-gray-600">
-                  Theatre: <b>{s.theatreId?.name}</b>
-                </p>
+              return (
+                <div
+                  key={s._id}
+                  className={`bg-white p-5 rounded-lg shadow ${
+                    isBlocked ? "opacity-70" : ""
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-lg">{s.name}</h3>
+                    {statusBadge(s.status)}
+                  </div>
 
-                <p className="text-sm text-gray-500">
-                  {s.rows} x {s.seatsPerRow} · Total {s.totalSeats}
-                </p>
+                  <p className="text-sm text-gray-600">
+                    Theatre: <b>{s.theatreId?.name}</b>
+                  </p>
 
-                <div className="text-xs mt-2">
-                  {s.screenType && <p>Type: {s.screenType}</p>}
-                  {s.projectorType && <p>Projector: {s.projectorType}</p>}
-                  {s.soundSystem && <p>Sound: {s.soundSystem}</p>}
-                </div>
+                  <p className="text-sm text-gray-500">
+                    {s.rows} × {s.seatsPerRow} · {s.totalSeats} seats
+                  </p>
 
-                <div className="flex justify-between items-center mt-4">
-                  <button
-                    className="text-[#f84464] text-sm hover:underline"
-                    onClick={() =>
-                      navigate(`/seller/add-show/${s.theatreId?._id}`)
-                    }
-                  >
-                    + Add Show
-                  </button>
+                  <div className="text-xs mt-2 text-gray-600">
+                    <p>Type: {s.screenType}</p>
+                    <p>Projector: {s.projectorType}</p>
+                    <p>Sound: {s.soundSystem}</p>
+                  </div>
 
-                  <div className="flex gap-2">
-                    {/* EDIT */}
+                  <div className="flex justify-between items-center mt-4">
                     <button
-                      onClick={() => openEditModal(s)}
-                      className="text-blue-500 hover:text-blue-700"
+                      disabled={isBlocked}
+                      onClick={() =>
+                        navigate(`/seller/add-show/${s.theatreId?._id}`)
+                      }
+                      className={`text-sm ${
+                        isBlocked
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-[#f84464] hover:underline"
+                      }`}
                     >
-                      <Pencil size={16} />
+                      + Add Show
                     </button>
 
-                    {/* DELETE */}
-                    <button
-                      onClick={() => openDeleteModal(s)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        disabled={isBlocked}
+                        onClick={() => openEditModal(s)}
+                        className={`${
+                          isBlocked
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-blue-500 hover:text-blue-700"
+                        }`}
+                      >
+                        <Pencil size={16} />
+                      </button>
+
+                      <button
+                        disabled={isBlocked}
+                        onClick={() => openDeleteModal(s)}
+                        className={`${
+                          isBlocked
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-red-500 hover:text-red-700"
+                        }`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </main>
       </div>
 
-      {/* ✅ DELETE MODAL */}
+      {/* DELETE MODAL */}
       {confirmModal && selectedScreen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-40">
           <div className="bg-white p-6 rounded w-full max-w-md">
@@ -199,7 +233,7 @@ export default function ScreenList() {
         </div>
       )}
 
-      {/* ✅ EDIT MODAL */}
+      {/* EDIT MODAL */}
       {editModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-40">
           <div className="bg-white p-6 rounded w-full max-w-lg">
@@ -213,57 +247,28 @@ export default function ScreenList() {
             <div className="grid grid-cols-2 gap-3">
               <input
                 className="border p-2 rounded col-span-2"
-                placeholder="Screen Name"
                 value={editData.name || ""}
                 onChange={(e) =>
                   setEditData({ ...editData, name: e.target.value })
                 }
               />
-
               <input
                 type="number"
                 className="border p-2 rounded"
-                placeholder="Rows"
                 value={editData.rows || ""}
                 onChange={(e) =>
                   setEditData({ ...editData, rows: e.target.value })
                 }
               />
-
               <input
                 type="number"
                 className="border p-2 rounded"
-                placeholder="Seats / Row"
                 value={editData.seatsPerRow || ""}
                 onChange={(e) =>
-                  setEditData({ ...editData, seatsPerRow: e.target.value })
-                }
-              />
-
-              <input
-                className="border p-2 rounded"
-                placeholder="Screen Type"
-                value={editData.screenType || ""}
-                onChange={(e) =>
-                  setEditData({ ...editData, screenType: e.target.value })
-                }
-              />
-
-              <input
-                className="border p-2 rounded"
-                placeholder="Projector Type"
-                value={editData.projectorType || ""}
-                onChange={(e) =>
-                  setEditData({ ...editData, projectorType: e.target.value })
-                }
-              />
-
-              <input
-                className="border p-2 rounded col-span-2"
-                placeholder="Sound System"
-                value={editData.soundSystem || ""}
-                onChange={(e) =>
-                  setEditData({ ...editData, soundSystem: e.target.value })
+                  setEditData({
+                    ...editData,
+                    seatsPerRow: e.target.value,
+                  })
                 }
               />
             </div>

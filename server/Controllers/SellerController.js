@@ -118,6 +118,7 @@ exports.onboard = async (req, res) => {
     return res.status(500).json({ ok: false, message: "Error onboarding" });
   }
 };
+
 exports.getMe = async (req, res) => {
   try {
     const token = req.cookies.seller_token;
@@ -133,22 +134,30 @@ exports.getMe = async (req, res) => {
     return res.json({ ok: false, seller: null });
   }
 };
-// ===================================
+
 // ✅ SELLER BOOKINGS
-// ===================================
 exports.getSellerBookings = async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user?._id;
+
+    if (!sellerId) {
+      return res.status(401).json({
+        ok: false,
+        message: "Unauthorized seller",
+      });
+    }
 
     const bookings = await Booking.find()
-      .populate("theatre", "name sellerId")
+      .populate({
+        path: "theatre",
+        match: { sellerId }, // ✅ FILTER HERE
+        select: "name sellerId",
+      })
       .populate("screen", "name")
       .sort({ createdAt: -1 });
 
-    // show only bookings belonging to this seller
-    const sellerBookings = bookings.filter(
-      (b) => b.theatre?.sellerId?.toString() === sellerId.toString()
-    );
+    // ✅ Remove bookings where theatre didn't match seller
+    const sellerBookings = bookings.filter((b) => b.theatre);
 
     res.json({
       ok: true,
@@ -156,10 +165,11 @@ exports.getSellerBookings = async (req, res) => {
       total: sellerBookings.length,
     });
   } catch (err) {
-    console.error("SELLER BOOKINGS ERROR FULL:", err);
-    return res.status(500).json({
+    console.error("SELLER BOOKINGS ERROR:", err);
+    res.status(500).json({
       ok: false,
-      msg: err.message || "Failed to load bookings",
+      message: "Failed to load seller bookings",
     });
   }
 };
+

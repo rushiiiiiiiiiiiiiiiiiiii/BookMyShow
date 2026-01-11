@@ -31,6 +31,16 @@ import SuccessPage from "./Pages/SuccessPage";
 import BuyTicketsPage from "./Pages/BuyTicketsPage";
 import MyBookingsPage from "./Pages/MyBookingsPage";
 import SellerBookings from "./AuthSeller/SellerBookings";
+import SuperAdminDashboard from "./SuperAdmin/SuperAdminDashboard";
+
+// ================= SUPER ADMIN =================
+import AdminSellers from "./SuperAdmin/AdminSellers";
+// import PendingSellers from "./SuperAdmin/PendingSellers";
+import AdminTheatres from "./SuperAdmin/AdminTheatres";
+import AdminScreens from "./SuperAdmin/AdminScreens";
+import AdminShows from "./SuperAdmin/AdminShows";
+import AdminBookings from "./SuperAdmin/AdminBookings";
+// import AdminRevenue from "./SuperAdmin/AdminRevenue";
 
 function App() {
   return (
@@ -59,31 +69,139 @@ function App() {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/buytickets/:movieName" element={<BuyTicketsPage />} />
           <Route path="/profile" element={<MyBookingsPage />} />
-
           {/* SELLER AUTH */}
           <Route path="/seller/signin" element={<SellerLogin />} />
           <Route path="/seller/onboard" element={<SellerOnboard />} />
-          <Route path="/seller/bookings" element={<SellerBookings />} />
-
-          {/* SELLER DASHBOARD */}
-          <Route path="/seller/dashboard" element={<SellerDashboard />} />
-
-          {/* THEATRES */}
-          <Route path="/seller/theatres" element={<TheaterList />} />
-
-          {/* PER-THEATRE ROUTES (IMPORTANT FIX) */}
-          <Route path="/seller/screens/:theatreId" element={<ScreenList />} />
-          <Route path="/seller/shows/:theatreId" element={<ShowsList />} />
-
-          {/* GLOBAL ROUTES (OPTIONAL VIEW) */}
-          <Route path="/seller/screens" element={<ScreenList />} />
-          <Route path="/seller/shows" element={<ShowsList />} />
-
-          {/* CREATION */}
-          <Route path="/seller/add-theatre" element={<AddTheatre />} />
-          <Route path="/seller/add-screen/:theatreId" element={<AddScreen />} />
-          <Route path="/seller/add-show/:theatreId" element={<AddShow />} />
-
+          {/* ================= SUPER ADMIN ROUTES ================= */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute role="admin">
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/sellers"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminSellers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/theatres"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminTheatres />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/screens"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminScreens />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/shows"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminShows />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminBookings />
+              </ProtectedRoute>
+            }
+          />
+          // SELLER DASHBOARD
+          <Route
+            path="/seller/dashboard"
+            element={
+              <ProtectedRoute role="seller">
+                <SellerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/bookings"
+            element={
+              <ProtectedRoute role="seller">
+                <SellerBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/theatres"
+            element={
+              <ProtectedRoute role="seller">
+                <TheaterList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/screens/:theatreId"
+            element={
+              <ProtectedRoute role="seller">
+                <ScreenList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/shows/:theatreId"
+            element={
+              <ProtectedRoute role="seller">
+                <ShowsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/screens"
+            element={
+              <ProtectedRoute role="seller">
+                <ScreenList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/shows"
+            element={
+              <ProtectedRoute role="seller">
+                <ShowsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/add-theatre"
+            element={
+              <ProtectedRoute role="seller">
+                <AddTheatre />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/add-screen/:theatreId"
+            element={
+              <ProtectedRoute role="seller">
+                <AddScreen />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/add-show/:theatreId"
+            element={
+              <ProtectedRoute role="seller">
+                <AddShow />
+              </ProtectedRoute>
+            }
+          />
           {/* USER AUTH */}
           <Route
             path="/register"
@@ -94,7 +212,6 @@ function App() {
             }
           />
           <Route path="/shows" element={<UserShows />} />
-
           <Route
             path="/setup-name"
             element={

@@ -24,36 +24,36 @@ export default function SellerLogin() {
     }
   }
 
-async function verifyOtp() {
-  if (!otp.trim()) return toast.succes("Enter OTP");
+  async function verifyOtp() {
+    if (!otp.trim()) return toast.succes("Enter OTP");
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await axios.post(
-      "https://bookmyshow-backend-mzd2.onrender.com/api/seller/verify-otp",
-      { email, otp },
-      { withCredentials: true }   // ⬅ VERY IMPORTANT
-    );
+      const res = await axios.post(
+        "http://localhost:8000/api/seller/verify-otp",
+        { email, otp },
+        { withCredentials: true } // ⬅ VERY IMPORTANT
+      );
 
-    setLoading(false);
+      setLoading(false);
 
-    if (res.data.ok) {
-      // NO localStorage, we use secure httpOnly cookie
-      if (res.data.isNewSeller) {
-        navigate("/seller/onboard");
+      if (res.data.ok) {
+        // NO localStorage, we use secure httpOnly cookie
+        if (res.data.isNewSeller) {
+          navigate("/seller/onboard");
+        } else {
+          navigate("/seller/dashboard");
+        }
       } else {
-        navigate("/seller/dashboard");
+        toast.succes(res.data.message || "Invalid OTP");
       }
-    } else {
-      toast.succes(res.data.message || "Invalid OTP");
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+      toast.succes("Server error");
     }
-  } catch (err) {
-    setLoading(false);
-    console.error(err);
-    toast.succes("Server error");
   }
-}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -62,7 +62,9 @@ async function verifyOtp() {
 
         {!otpScreen ? (
           <>
-            <label className="block text-sm text-gray-700 mb-1">Official business email</label>
+            <label className="block text-sm text-gray-700 mb-1">
+              Official business email
+            </label>
             <input
               type="email"
               value={email}
@@ -77,14 +79,20 @@ async function verifyOtp() {
             >
               {loading ? "Sending..." : "Send OTP"}
             </button>
-            <p className="text-xs text-gray-500 mt-3">We will send OTP to this email for partner login.</p>
+            <p className="text-xs text-gray-500 mt-3">
+              We will send OTP to this email for partner login.
+            </p>
           </>
         ) : (
           <>
-            <label className="block text-sm text-gray-700 mb-1">Enter OTP</label>
+            <label className="block text-sm text-gray-700 mb-1">
+              Enter OTP
+            </label>
             <input
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) =>
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
               placeholder="123456"
               className="w-full px-4 py-2 border rounded-lg outline-none mb-4"
             />
@@ -96,7 +104,10 @@ async function verifyOtp() {
               {loading ? "Verifying..." : "Verify & Continue"}
             </button>
 
-            <button onClick={() => setOtpScreen(false)} className="w-full mt-3 py-2 border rounded-lg text-sm">
+            <button
+              onClick={() => setOtpScreen(false)}
+              className="w-full mt-3 py-2 border rounded-lg text-sm"
+            >
               Edit Email
             </button>
           </>

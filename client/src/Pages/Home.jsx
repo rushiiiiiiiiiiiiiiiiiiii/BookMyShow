@@ -76,16 +76,16 @@ function Hero({ city, carouselMovies }) {
             </p>
             <div className="mt-8 flex gap-3">
               <button
-                onClick={() => navigate("/movies")}
+                // onClick={() => navigate("/movies")}
                 className={`px-6 py-3 rounded-lg text-white font-bold shadow-xl ${BMS_BTN}`}
               >
                 Book Tickets
               </button>
               <button
-                onClick={() => navigate("/events")}
+                // onClick={() => navigate("/events")}
                 className="px-6 py-3 rounded-lg border border-gray-300 text-gray-800"
               >
-                Events Near Me
+                Theatres Near Me
               </button>
             </div>
           </div>
@@ -124,11 +124,20 @@ function Hero({ city, carouselMovies }) {
 }
 
 // TITLE
-function SectionTitle({ title }) {
+
+function SectionTitle({ title, viewAllTo }) {
+  const navigate = useNavigate();
+
   return (
     <div className="flex justify-between max-w-7xl mx-auto px-4 mt-12 mb-4">
       <h3 className="text-2xl font-bold">{title}</h3>
-      <span className="text-[#f84464] cursor-pointer text-sm">View All</span>
+
+      <span
+        onClick={() => navigate(viewAllTo)}
+        className="text-[#f84464] cursor-pointer text-sm hover:underline"
+      >
+        View All
+      </span>
     </div>
   );
 }
@@ -178,7 +187,10 @@ function TheaterCard({ t }) {
 // MAIN PAGE
 // ============================================================
 export default function Home() {
-  const [city, setCity] = useState("Mumbai");
+  const [city, setCity] = useState(() => {
+    return localStorage.getItem("city") || "Mumbai";
+  });
+
   useEffect(() => {
     function handleCityChange() {
       const updatedCity = localStorage.getItem("city");
@@ -195,13 +207,15 @@ export default function Home() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const carouselMovies = loading ? sampleMovies : movies;
+
   const randomRecommended = shuffleArray(carouselMovies).slice(0, 10);
+
   const [theatres, setTheatres] = useState([]);
   useEffect(() => {
     async function loadTheatres() {
       try {
         const res = await axios.get(
-          `https://bookmyshow-backend-mzd2.onrender.com/api/user/theatres?city=${city}`
+          `http://localhost:8000/api/user/theatres?city=${city}`
         );
 
         if (res.data.ok) {
@@ -215,21 +229,36 @@ export default function Home() {
     loadTheatres();
   }, [city]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("city");
-    if (saved) setCity(saved);
-  }, []);
+  // useEffect(() => {
+  //   const saved = localStorage.getItem("city");
+  //   if (saved) setCity(saved);
+  // }, []);
 
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
+
         const res = await axios.get(
-          `https://bookmyshow-backend-mzd2.onrender.com/api/user/shows?city=${city}`
+          `http://localhost:8000/api/user/shows?city=${city}`
         );
+
+        const validShows = res.data.shows.filter(
+          (s) =>
+            s.status === "active" &&
+            s.theatreId &&
+            s.theatreId.status === "approved" &&
+            s.theatreId.isActive === true &&
+            s.screenId &&
+            s.screenId.status === "active"
+        );
+
+        console.log("VALID SHOWS COUNT:", validShows.length);
+
         const seen = new Set();
         const list = [];
-        res.data.shows.forEach((s) => {
+
+        validShows.forEach((s) => {
           if (!seen.has(s.movie)) {
             seen.add(s.movie);
             list.push({
@@ -239,23 +268,33 @@ export default function Home() {
             });
           }
         });
+
+        console.log("MOVIES LIST:", list);
+
         setMovies(list.length ? list : sampleMovies);
-      } catch {
+      } catch (err) {
+        console.error("SHOW LOAD ERROR:", err);
         setMovies(sampleMovies);
       } finally {
         setLoading(false);
       }
     }
+
     load();
   }, [city]);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar movies={carouselMovies} />
+
       <Hero city={city} carouselMovies={carouselMovies} />
 
       {/* RECOMMENDED MOVIES */}
-      <SectionTitle title="Newly Launched Movies" />
+      <SectionTitle
+        title="Newly Launched Movies"
+        viewAllTo="/shows?type=movies"
+      />
+
       <div className="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto pb-6">
         {carouselMovies.map((m, i) => (
           <MovieCard key={i} m={m} />
@@ -333,14 +372,22 @@ export default function Home() {
 
       {/* THEATERS (✅ ADDED) */}
       {/* THEATERS (FROM BACKEND) */}
-      <SectionTitle title={`Theatres Near You (${city})`} />
+      <SectionTitle
+        title={`Theatres Near You (${city})`}
+        viewAllTo="/shows?type=theatres"
+      />
 
       <div className="max-w-7xl mx-auto mb-10 px-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         {theatres.length === 0 ? (
           <p className="text-gray-500 col-span-full">No theatres found</p>
         ) : (
           theatres
-            .filter((t) => t.city === city)
+            .filter(
+              (t) =>
+                t.city === city &&
+                t.status === "approved" && // ✅ ADD THIS
+                t.isActive === true // ✅ ADD THIS
+            )
             .map((t) => (
               <TheaterCard
                 key={t._id}
@@ -354,7 +401,10 @@ export default function Home() {
       </div>
 
       {/* EXTRA RECOMMENDED MOVIES (✅ NEW) */}
-      <SectionTitle title="Recommended For You" />
+      <SectionTitle
+        title="Recommended For You"
+        viewAllTo="/shows?type=recommended"
+      />
 
       <div className="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto pb-10">
         {randomRecommended.map((m, i) => (

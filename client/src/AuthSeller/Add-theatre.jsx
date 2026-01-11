@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SellerNavbar from "../Components/Navbar";
-import {toast} from 'react-hot-toast'
+import { toast } from "react-hot-toast";
 axios.defaults.withCredentials = true;
 
 const BMS_RED = "#f84464";
@@ -55,16 +55,16 @@ export default function AddTheatre() {
   }
 
   async function saveTheatre() {
-    const {
-      name,
-      city,
-      pincode,
-      address,
-      contactEmail,
-      contactPhone,
-    } = form;
+    const { name, city, pincode, address, contactEmail, contactPhone } = form;
 
-    if (!name || !city || !pincode || !address || !contactEmail || !contactPhone) {
+    if (
+      !name ||
+      !city ||
+      !pincode ||
+      !address ||
+      !contactEmail ||
+      !contactPhone
+    ) {
       alert("All required fields must be filled.");
       return;
     }
@@ -80,7 +80,10 @@ export default function AddTheatre() {
         },
       };
 
-      const res = await axios.post("https://bookmyshow-backend-mzd2.onrender.com/api/seller/theatre", payload);
+      const res = await axios.post(
+        "http://localhost:8000/api/seller/theatre",
+        payload
+      );
 
       if (res.data.ok) {
         toast.success("Theatre added successfully ✅");
@@ -104,33 +107,85 @@ export default function AddTheatre() {
         <h1 className="text-3xl font-bold mb-8">🎬 Add New Theatre</h1>
 
         <div className="bg-white p-8 rounded-lg shadow">
-
           <h2 className="text-lg font-semibold mb-4 border-b pb-3">
             Theatre Details
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <input
+              name="name"
+              placeholder="Theatre Name"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="brand"
+              placeholder="Brand (PVR / INOX)"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
 
-            <input name="name" placeholder="Theatre Name" onChange={handleChange} className="border p-2 rounded" />
-            <input name="brand" placeholder="Brand (PVR / INOX)" onChange={handleChange} className="border p-2 rounded" />
-
-            <select name="theatreType" onChange={handleChange} className="border p-2 rounded">
+            <select
+              name="theatreType"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            >
               <option>Multiplex</option>
               <option>Single Screen</option>
               <option>IMAX</option>
               <option>Drive-In</option>
             </select>
 
-            <input name="city" placeholder="City" onChange={handleChange} className="border p-2 rounded" />
-            <input name="pincode" placeholder="Pincode" onChange={handleChange} className="border p-2 rounded" />
-            <input name="contactEmail" placeholder="Contact Email" onChange={handleChange} className="border p-2 rounded" />
-            <input name="contactPhone" placeholder="Contact Phone" onChange={handleChange} className="border p-2 rounded" />
+            <input
+              name="city"
+              placeholder="City"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="pincode"
+              placeholder="Pincode"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="contactEmail"
+              placeholder="Contact Email"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="contactPhone"
+              placeholder="Contact Phone"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
 
-            <input name="openingTime" type="time" onChange={handleChange} className="border p-2 rounded" />
-            <input name="closingTime" type="time" onChange={handleChange} className="border p-2 rounded" />
+            <input
+              name="openingTime"
+              type="time"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="closingTime"
+              type="time"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
 
-            <input name="lat" placeholder="Latitude" onChange={handleChange} className="border p-2 rounded" />
-            <input name="lng" placeholder="Longitude" onChange={handleChange} className="border p-2 rounded" />
+            <input
+              name="lat"
+              placeholder="Latitude"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              name="lng"
+              placeholder="Longitude"
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
 
             <textarea
               name="address"
@@ -139,14 +194,16 @@ export default function AddTheatre() {
               className="border p-2 rounded col-span-3"
               rows={3}
             />
-
           </div>
 
           <div className="mt-6">
             <h3 className="font-semibold mb-2">Amenities</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {AMENITIES.map((a) => (
-                <label key={a} className="flex items-center gap-2 text-sm cursor-pointer">
+                <label
+                  key={a}
+                  className="flex items-center gap-2 text-sm cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     checked={form.amenities.includes(a)}
@@ -175,7 +232,6 @@ export default function AddTheatre() {
               {saving ? "Saving..." : "Save Theatre"}
             </button>
           </div>
-
         </div>
       </div>
     </div>

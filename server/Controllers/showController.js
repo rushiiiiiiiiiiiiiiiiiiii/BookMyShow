@@ -30,7 +30,9 @@ exports.addShow = async (req, res) => {
   try {
     const token = req.cookies.seller_token;
     if (!token) {
-      return res.status(401).json({ ok: false, message: "Unauthorized access" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "Unauthorized access" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -54,8 +56,20 @@ exports.addShow = async (req, res) => {
     } = req.body;
 
     // ✅ Validation
-    if (!screenId || !movie || !language || !format || !startDate || !endDate || !time || !price || !durationMinutes) {
-      return res.status(400).json({ ok: false, message: "All fields are required" });
+    if (
+      !screenId ||
+      !movie ||
+      !language ||
+      !format ||
+      !startDate ||
+      !endDate ||
+      !time ||
+      !price ||
+      !durationMinutes
+    ) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "All fields are required" });
     }
 
     const start = new Date(startDate);
@@ -66,7 +80,10 @@ exports.addShow = async (req, res) => {
     }
 
     // ✅ Confirm ownership
-    const theatre = await Theatre.findOne({ _id: theatreId, sellerId: decoded.id });
+    const theatre = await Theatre.findOne({
+      _id: theatreId,
+      sellerId: decoded.id,
+    });
     if (!theatre) {
       return res.status(403).json({ ok: false, message: "Not your theatre" });
     }
@@ -79,7 +96,9 @@ exports.addShow = async (req, res) => {
 
     const endTime = addMinutesToTime(time, durationMinutes);
     if (!endTime) {
-      return res.status(400).json({ ok: false, message: "Invalid time or duration" });
+      return res
+        .status(400)
+        .json({ ok: false, message: "Invalid time or duration" });
     }
 
     const showsCreated = [];
@@ -103,6 +122,7 @@ exports.addShow = async (req, res) => {
           theatreId,
           screenId,
           movie,
+
           poster,
           language,
           format,
@@ -128,14 +148,11 @@ exports.addShow = async (req, res) => {
       message: `${showsCreated.length} shows created successfully`,
       showsCreated,
     });
-
   } catch (err) {
     console.error("ADD SHOW ERROR:", err);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 };
-
-
 
 /* ============================
    ✅ GET SHOWS BY THEATRE
@@ -326,7 +343,7 @@ exports.updateShow = async (req, res) => {
     }
 
     // ✅ Verify ownership
-    const theatre   = await Theatre.findOne({
+    const theatre = await Theatre.findOne({
       _id: show.theatreId,
       sellerId: decoded.id,
     });
@@ -396,26 +413,22 @@ exports.getShowsByCity = async (req, res) => {
   try {
     const { city } = req.query;
 
-    const theatres = await Theatre.find({ city, status: "approved" }, "_id");
+    const shows = await Show.find({ status: "active" })
+      .populate("theatreId", "name city status isActive")
+      .populate("screenId", "name status");
 
-    const shows = await Show.find({
-      theatreId: { $in: theatres.map((t) => t._id) },
-      status: "active",
-      date: { $gte: new Date().toISOString().split("T")[0] },
-    })
-      .populate("theatreId", "name city")
-      .populate("screenId", "name totalSeats");
+    const filtered = shows.filter(
+      (s) => s.theatreId && s.screenId && (!city || s.theatreId.city === city)
+    );
 
-    const enriched = shows.map((show) => {
-      const total = show.totalSeats || show.screenId?.totalSeats || 0;
-      const booked = show.bookedSeats.length;
-      const fillPercent = total ? Math.round((booked / total) * 100) : 0;
-      return { ...show.toObject(), fillPercent };
+    res.set("Cache-Control", "no-store"); // ⛔ disable cache
+
+    res.json({
+      ok: true,
+      shows: filtered,
     });
-
-    res.json({ ok: true, shows: enriched });
   } catch (err) {
-    console.error("CITY SHOW ERROR:", err);
+    console.error("USER SHOW ERROR:", err);
     res.status(500).json({ ok: false });
   }
 };
@@ -423,11 +436,26 @@ exports.getShowsByCity = async (req, res) => {
 exports.getSeatLayout = async (req, res) => {
   try {
     const show = await Show.findById(req.params.id).populate("screenId");
+
     if (!show) return res.status(404).json({ ok: false });
+
+    // ✅ Remove expired locks
+    const now = new Date();
+    show.lockedSeats = (show.lockedSeats || []).filter(
+      (lock) => lock.expiresAt > now
+    );
+
+    await show.save(); // update DB after cleanup
 
     res.json({
       ok: true,
+
+      // ✅ CONFIRMED BOOKINGS
       booked: show.bookedSeats || [],
+
+      // ✅ TEMPORARILY LOCKED (EXCLUDING EXPIRED)
+      locked: show.lockedSeats || [],
+
       screen: {
         rows: show.screenId.rows,
         seatsPerRow: show.screenId.seatsPerRow,
@@ -440,8 +468,6 @@ exports.getSeatLayout = async (req, res) => {
     res.status(500).json({ ok: false });
   }
 };
-
-
 
 exports.getShowsByMovie = async (req, res) => {
   try {
@@ -475,7 +501,6 @@ exports.getShowsByMovie = async (req, res) => {
       total: enriched.length,
       shows: enriched,
     });
-
   } catch (err) {
     console.error("GET MOVIE SHOW ERROR:", err);
     res.status(500).json({
@@ -504,7 +529,6 @@ exports.getShowById = async (req, res) => {
       ok: true,
       show: { ...show.toObject(), fillPercent },
     });
-
   } catch (err) {
     console.error("GET SHOW ID ERROR:", err);
     res.status(500).json({ ok: false });

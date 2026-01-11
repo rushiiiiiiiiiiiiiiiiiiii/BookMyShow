@@ -231,7 +231,10 @@ exports.getPublicTheatres = async (req, res) => {
   try {
     const { city } = req.query;
 
-    const filter = { isActive: true };
+    const filter = {
+      status: "approved",   // ✅ ONLY approved theatres
+      isActive: true
+    };
 
     if (city) filter.city = city;
 
@@ -249,3 +252,4 @@ exports.getPublicTheatres = async (req, res) => {
     });
   }
 };
+

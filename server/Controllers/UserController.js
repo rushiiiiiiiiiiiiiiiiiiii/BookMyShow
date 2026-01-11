@@ -52,18 +52,33 @@ exports.verifyOtp = async (req, res) => {
 
     delete otpStore[email];
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role, // 🔥 REQUIRED
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-    res
-      .cookie("token", token, {
-        httpOnly: false, // cannot be accessed by JS
-        secure: false, // true only on HTTPS (local dev = false)
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
-      .json({ ok: true, isNewUser });
+    const cookieOptions = {
+      httpOnly: true,
+      secure: false, // true in production HTTPS
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+
+    if (user.role === "admin") {
+      res
+        .cookie("admin_token", token, cookieOptions)
+        .json({ ok: true, role: "admin" });
+    } else {
+      res
+        .cookie("token", token, cookieOptions)
+        .json({ ok: true, role: user.role });
+    }
   } catch (err) {
     console.log(err);
     res.json({ ok: false, message: "Error verifying OTP" });

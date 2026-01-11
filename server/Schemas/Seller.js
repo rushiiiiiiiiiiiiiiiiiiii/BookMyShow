@@ -12,9 +12,19 @@ const SellerSchema = new mongoose.Schema(
     businessCity: String,
     businessPincode: String,
 
-    isVerified: { type: Boolean, default: false },
+    // onboarding / KYC
+    isVerified: { type: Boolean, default: true },
+
+    // admin enforcement (NEW)
+    status: {
+      type: String,
+      enum: ["approved", "blocked"],
+      default: "approved",
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.models.Seller || mongoose.model("Seller", SellerSchema);
+module.exports =
+  mongoose.models.Seller || mongoose.model("Seller", SellerSchema);

@@ -1,5 +1,18 @@
 const mongoose = require("mongoose");
 
+const lockedSeatSchema = new mongoose.Schema(
+  {
+    seatNumber: { type: String, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    expiresAt: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
 const ShowSchema = new mongoose.Schema(
   {
     theatreId: {
@@ -54,12 +67,10 @@ const ShowSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 30,
-      max: 400, // covers long movies as well
+      max: 400,
     },
-    poster: {
-      type: String,
-      required: false,
-    },
+
+    poster: String,
 
     price: {
       type: Number,
@@ -72,25 +83,23 @@ const ShowSchema = new mongoose.Schema(
       default: "active",
     },
 
-    // Max seats user can book in one transaction
     maxSeatsPerBooking: {
       type: Number,
       default: 10,
     },
 
-    // Subtitles flag (e.g. English subtitles for Hindi audio)
     isSubtitled: {
       type: Boolean,
       default: false,
     },
 
-    // Certification similar to BMS tags
     certificate: {
       type: String,
       enum: ["U", "UA", "U/A 7+", "U/A 13+", "A"],
       default: "UA",
     },
 
+    // ✅ CONFIRMED BOOKINGS
     bookedSeats: [
       {
         seatNumber: String,
@@ -101,9 +110,17 @@ const ShowSchema = new mongoose.Schema(
         bookedAt: Date,
       },
     ],
+
+    // ✅ TEMPORARY LOCKS (NEW)
+    lockedSeats: [lockedSeatSchema],
   },
   { timestamps: true }
 );
-ShowSchema.index({ theatreId: 1, screenId: 1, date: 1, time: 1 }, { unique: true });
+
+// prevent duplicate shows on same screen at same time
+ShowSchema.index(
+  { theatreId: 1, screenId: 1, date: 1, time: 1 },
+  { unique: true }
+);
 
 module.exports = mongoose.model("Show", ShowSchema);

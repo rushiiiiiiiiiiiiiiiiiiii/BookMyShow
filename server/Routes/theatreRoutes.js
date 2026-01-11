@@ -32,12 +32,12 @@ const {
   getShowsByMovie,
   getShowById,
 } = require("../Controllers/showController");
-const {
-  createBooking,
-  getMyBookings,
-  getBooking,
-} = require("../Controllers/bookingController");
-const authMiddleware = require("../Middlewears/authMiddleware");
+// const {
+//   createBooking,
+//   getMyBookings,
+//   getBooking,
+// } = require("../Controllers/bookingController");
+const authMiddleware = require("../Middlewears/auth");
 const { testMail } = require("../Controllers/testMail");
 /* ============================
    ✅ THEATRE ROUTES
@@ -74,9 +74,9 @@ router.get("/shows/:id", getShowById);
 
 //BOOKINING ROUTES
 
-router.post("/booking", authMiddleware, createBooking);
-router.get("/my-bookings", authMiddleware, getMyBookings);
-router.get("/booking/:id", authMiddleware, getBooking);
+// router.post("/booking", authMiddleware, createBooking);
+// router.get("/my-bookings", authMiddleware, getMyBookings);
+// router.get("/booking/:id", authMiddleware, getBooking);
 
 
 

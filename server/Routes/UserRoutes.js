@@ -6,7 +6,7 @@ const {
   setName,
   getMe,
 } = require("../Controllers/UserController");
-const auth = require("../Middlewears/authMiddleware");
+const auth = require("../Middlewears/auth");
 
 Authrouter.post("/send-otp", sendOtp);
 Authrouter.post("/verify-otp", verifyOtp);
