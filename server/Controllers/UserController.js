@@ -1,35 +1,39 @@
 const User = require("../Schemas/User");
-const transporter = require("../utils/Mail");
-const otpStore = require("../utils/otpStore");
-const jwt = require("jsonwebtoken");
+const { sendOtpEmail } = require("../utils/brevoMailer");
 
-// SEND OTP
+const otpStore = require("../utils/otpStore");
+const jwt = require("jsonwebtoken");  
+
+// 📌 SEND OTP
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) return res.json({ ok: false, message: "Email is required" });
+    if (!email)
+      return res.status(400).json({ ok: false, message: "Email required" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = otp;
+    const expires = Date.now() + 5 * 60 * 1000;
 
-    await transporter.sendMail({
-      from: `"BookMyShow Clone" <${process.env.MAIL_USER}>`,
+    otpStore[email] = { otp, expires };
+
+    await sendOtpEmail({
       to: email,
-      subject: "Your OTP Code",
+      subject: "Your Seller Login OTP",
       html: `
-        <h2>Your OTP Code</h2>
-        <p style="font-size: 24px; font-weight: bold;">${otp}</p>
-        <p>Do not share this code with anyone.</p>
+        <h3>Your Seller Login OTP</h3>
+        <p style="font-size:22px;font-weight:bold">${otp}</p>
+        <p>Valid for 5 minutes</p>
       `,
     });
 
-    res.json({ ok: true, message: "OTP sent successfully" });
+    res.json({ ok: true, message: "OTP sent" });
   } catch (err) {
-    console.log(err);
-    res.json({ ok: false, message: "Error sending OTP" });
+    console.error("SELLER OTP ERROR:", err.response?.data || err.message);
+    res.status(500).json({ ok: false, message: "Error sending OTP" });
   }
 };
+
+
 
 // VERIFY OTP
 exports.verifyOtp = async (req, res) => {

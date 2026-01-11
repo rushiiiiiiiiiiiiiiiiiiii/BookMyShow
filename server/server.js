@@ -1,11 +1,13 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const Conn = require("./Connection/Conn");
 const cookieParser = require("cookie-parser");
 
-require("dotenv").config();
 const Authrouter = require("./Routes/UserRoutes");
 // const transporter = require("./utils/Mail");
+const { sendOtpEmail } = require("./utils/brevoMailer");
+
 const app = express();
 app.use(cookieParser());
 app.use(

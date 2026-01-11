@@ -1,4 +1,5 @@
-const transporter = require("../utils/Mail");
+const { sendOtpEmail } = require("../utils/brevoMailer");
+
 
 exports.testMail = async (req, res) => {
   try {
