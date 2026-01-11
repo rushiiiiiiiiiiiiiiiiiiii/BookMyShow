@@ -31,7 +31,7 @@ export default function SellerLogin() {
       setLoading(true);
 
       const res = await axios.post(
-        "https://bookmyshow-backend-mzd2.onrender.com/api/seller/verify-otp",
+        "http://localhost:8000/api/seller/verify-otp",
         { email, otp },
         { withCredentials: true } // ⬅ VERY IMPORTANT
       );

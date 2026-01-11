@@ -1,28 +1,31 @@
-const axios = require("axios");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
+
+const client = SibApiV3Sdk.ApiClient.instance;
+
+// 🔑 API KEY AUTH
+client.authentications["api-key"].apiKey =
+  process.env.BREVO_API_KEY;
+
+const transactionalApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 exports.sendOtpEmail = async ({ to, subject, html }) => {
-  if (!process.env.BREVO_API_KEY) {
-    throw new Error("BREVO_API_KEY missing");
-  }
-  console.log("BREVO KEY:", process.env.BREVO_API_KEY);
-
-  return axios.post(
-    "https://api.brevo.com/v3/smtp/email",
-    {
+  try {
+    const response = await transactionalApi.sendTransacEmail({
       sender: {
+        email: process.env.BREVO_SENDER_EMAIL,
         name: "BookMyShow Clone",
-        email: "no-reply@bookmyshow.com",
       },
       to: [{ email: to }],
       subject,
       htmlContent: html,
-    },
-    {
-      headers: {
-        "api-key": process.env.BREVO_API_KEY,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }
-  );
+    });
+
+    return response;
+  } catch (error) {
+    console.error(
+      "BREVO MAIL ERROR:",
+      error.response?.body || error.message
+    );
+    throw error;
+  }
 };

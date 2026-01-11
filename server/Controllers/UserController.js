@@ -4,7 +4,7 @@ const { sendOtpEmail } = require("../utils/brevoMailer");
 const otpStore = require("../utils/otpStore");
 const jwt = require("jsonwebtoken");  
 
-// 📌 SEND OTP
+// SEND OTP
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -12,26 +12,28 @@ exports.sendOtp = async (req, res) => {
       return res.status(400).json({ ok: false, message: "Email required" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = Date.now() + 5 * 60 * 1000;
+    const expires = Date.now() + 5 * 60 * 1000; // 5 min
 
+    // ✅ STORE AS OBJECT
     otpStore[email] = { otp, expires };
 
     await sendOtpEmail({
       to: email,
-      subject: "Your Seller Login OTP",
+      subject: "Your OTP Code",
       html: `
-        <h3>Your Seller Login OTP</h3>
-        <p style="font-size:22px;font-weight:bold">${otp}</p>
+        <h2>Your OTP Code</h2>
+        <p style="font-size:24px;font-weight:bold">${otp}</p>
         <p>Valid for 5 minutes</p>
       `,
     });
 
-    res.json({ ok: true, message: "OTP sent" });
+    res.json({ ok: true, message: "OTP sent successfully" });
   } catch (err) {
-    console.error("SELLER OTP ERROR:", err.response?.data || err.message);
+    console.error("USER OTP ERROR:", err.response?.data || err.message);
     res.status(500).json({ ok: false, message: "Error sending OTP" });
   }
 };
+
 
 
 
@@ -40,54 +42,49 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    if (otpStore[email] !== otp)
-      return res.json({ ok: false, message: "Invalid OTP" });
+    const record = otpStore[email];
+
+    // ❌ no record or wrong OTP
+    if (!record || record.otp !== otp) {
+      return res.status(400).json({ ok: false, message: "Invalid OTP" });
+    }
+
+    // ⏰ expired
+    if (Date.now() > record.expires) {
+      delete otpStore[email];
+      return res.status(400).json({ ok: false, message: "OTP expired" });
+    }
+
+    delete otpStore[email]; // cleanup
 
     let user = await User.findOne({ email });
-
     let isNewUser = false;
+
     if (!user) {
       isNewUser = true;
-      user = await User.create({
-        email,
-        isVerified: true,
-      });
+      user = await User.create({ email, isVerified: true });
     }
-
-    delete otpStore[email];
 
     const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role, // 🔥 REQUIRED
-      },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
-    const cookieOptions = {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // true in production HTTPS
+      secure: false,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    };
+    });
 
-    if (user.role === "admin") {
-      res
-        .cookie("admin_token", token, cookieOptions)
-        .json({ ok: true, role: "admin" });
-    } else {
-      res
-        .cookie("token", token, cookieOptions)
-        .json({ ok: true, role: user.role });
-    }
+    res.json({ ok: true, role: user.role, isNewUser });
   } catch (err) {
-    console.log(err);
-    res.json({ ok: false, message: "Error verifying OTP" });
+    console.error(err);
+    res.status(500).json({ ok: false, message: "Error verifying OTP" });
   }
 };
+
 
 // SET NAME
 exports.setName = async (req, res) => {
