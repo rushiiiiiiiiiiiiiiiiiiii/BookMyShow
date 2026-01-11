@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const Conn = require("./Connection/Conn");
 const cookieParser = require("cookie-parser");
+    
 
 const Authrouter = require("./Routes/UserRoutes");
 // const transporter = require("./utils/Mail");
@@ -10,11 +11,12 @@ const { sendOtpEmail } = require("./utils/brevoMailer");
 
 const app = express();
 app.use(cookieParser());
+app.set("trust proxy", 1);
 app.use(
   cors({
     origin:[
        "http://localhost:5173",
-       "https://book-my-show-frontend-ashen.vercel.app"
+       "https://book-my-show-frontend-ashen.vercel.app",
     ],
     credentials: true,
   })

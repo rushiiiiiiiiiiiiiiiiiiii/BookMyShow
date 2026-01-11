@@ -2,7 +2,7 @@ const User = require("../Schemas/User");
 const { sendOtpEmail } = require("../utils/brevoMailer");
 
 const otpStore = require("../utils/otpStore");
-const jwt = require("jsonwebtoken");  
+const jwt = require("jsonwebtoken");
 
 // SEND OTP
 exports.sendOtp = async (req, res) => {
@@ -34,35 +34,34 @@ exports.sendOtp = async (req, res) => {
   }
 };
 
-
-
-
-// VERIFY OTP
+// VERIFY OTP (USER + ADMIN)
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
     const record = otpStore[email];
 
-    // ❌ no record or wrong OTP
     if (!record || record.otp !== otp) {
       return res.status(400).json({ ok: false, message: "Invalid OTP" });
     }
 
-    // ⏰ expired
     if (Date.now() > record.expires) {
       delete otpStore[email];
       return res.status(400).json({ ok: false, message: "OTP expired" });
     }
 
-    delete otpStore[email]; // cleanup
+    delete otpStore[email];
 
     let user = await User.findOne({ email });
     let isNewUser = false;
 
     if (!user) {
       isNewUser = true;
-      user = await User.create({ email, isVerified: true });
+      user = await User.create({
+        email,
+        isVerified: true,
+        role: "user", // default
+      });
     }
 
     const token = jwt.sign(
@@ -71,20 +70,37 @@ exports.verifyOtp = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    // ✅ IMPORTANT: role-based cookie
+    const cookieName = user.role === "admin" ? "admin_token" : "token";
+
+    res.cookie(cookieName, token, {
+      // //production
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      partitioned: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
+
+      //local
+      // httpOnly: true,
+      // secure: false,
+      // sameSite: "lax",
+      // path: "/",
+      // partitioned: true,
+      // maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ ok: true, role: user.role, isNewUser });
+    res.json({
+      ok: true,
+      role: user.role,
+      isNewUser,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("VERIFY OTP ERROR:", err);
     res.status(500).json({ ok: false, message: "Error verifying OTP" });
   }
 };
-
 
 // SET NAME
 exports.setName = async (req, res) => {

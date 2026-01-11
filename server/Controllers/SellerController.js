@@ -1,11 +1,11 @@
-  const Seller = require("../Schemas/Seller");
-  const Booking = require('../Schemas/Booking')
-  const otpStore = require("../utils/sellerOtpStore");
-  const { sendOtpEmail } = require("../utils/brevoMailer");
+const Seller = require("../Schemas/Seller");
+const Booking = require("../Schemas/Booking");
+const otpStore = require("../utils/sellerOtpStore");
+const { sendOtpEmail } = require("../utils/brevoMailer");
 
-  const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
-  // 📌 SEND OTP
+// 📌 SEND OTP
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -36,142 +36,127 @@ exports.sendOtp = async (req, res) => {
   }
 };
 
+// 📌 VERIFY OTP
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
 
-  // 📌 VERIFY OTP
-  exports.verifyOtp = async (req, res) => {
-    try {
-      const { email, otp } = req.body;
+    if (!email || !otp)
+      return res
+        .status(400)
+        .json({ ok: false, message: "Email and OTP required" });
 
-      if (!email || !otp)
-        return res
-          .status(400)
-          .json({ ok: false, message: "Email and OTP required" });
+    const record = otpStore[email];
+    if (!record || record.otp !== otp)
+      return res.status(400).json({ ok: false, message: "Invalid OTP" });
 
-      const record = otpStore[email];
-      if (!record || record.otp !== otp)
-        return res.status(400).json({ ok: false, message: "Invalid OTP" });
-
-      if (Date.now() > record.expires) {
-        delete otpStore[email];
-        return res.status(400).json({ ok: false, message: "OTP expired" });
-      }
-
+    if (Date.now() > record.expires) {
       delete otpStore[email];
-
-      let seller = await Seller.findOne({ email });
-      let isNewSeller = false;
-
-      if (!seller) {
-        seller = await Seller.create({ email, isVerified: true });
-        isNewSeller = true;
-      }
-
-      const token = jwt.sign(
-        { id: seller._id, role: "seller" },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
-
-      res
-        .cookie("seller_token", token, {
-          httpOnly: false,
-          secure: false,
-          sameSite: "lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        })
-        .json({ ok: true, isNewSeller });
-    } catch (err) {
-      console.error("VERIFY OTP ERROR:", err);
-      return res.status(500).json({ ok: false, message: "Error verifying OTP" });
+      return res.status(400).json({ ok: false, message: "OTP expired" });
     }
-  };
 
-  // 📌 ONBOARD SELLER (SAVE DETAILS)
-  exports.onboard = async (req, res) => {
-    try {
-      const token = req.cookies.seller_token;
-      if (!token)
-        return res.status(401).json({ ok: false, message: "Unauthorized" });
+    delete otpStore[email];
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const seller = await Seller.findById(decoded.id);
+    let seller = await Seller.findOne({ email });
+    let isNewSeller = false;
 
-      if (!seller)
-        return res.status(404).json({ ok: false, message: "Seller not found" });
-
-      const { bizName, businessType, address, city, pincode, phone } = req.body;
-
-      seller.name = bizName;
-      seller.phone = phone || seller.phone;
-
-      seller.businessName = bizName;
-      seller.businessType = businessType;
-      seller.businessAddress = address;
-      seller.businessCity = city;
-      seller.businessPincode = pincode;
-
-      seller.isVerified = true;
-
-      await seller.save();
-
-      return res.json({ ok: true, seller });
-    } catch (err) {
-      console.error("ONBOARD ERROR:", err);
-      return res.status(500).json({ ok: false, message: "Error onboarding" });
+    if (!seller) {
+      seller = await Seller.create({ email, isVerified: true });
+      isNewSeller = true;
     }
-  };
 
-  exports.getMe = async (req, res) => {
-    try {
-      const token = req.cookies.seller_token;
-      if (!token) return res.json({ ok: false, seller: null });
+    const token = jwt.sign(
+      { id: seller._id, role: "seller" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const seller = await Seller.findById(decoded.id);
+    res
+      .cookie("seller_token", token, {
+        // //production
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        partitioned: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
 
-      if (!seller) return res.json({ ok: false, seller: null });
+        //local
+        httpOnly: true,
+        // secure: false,
+        // sameSite: "lax",
+        // path: "/",
+        // partitioned: true,
+        // maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .json({ ok: true, isNewSeller });
+  } catch (err) {
+    console.error("VERIFY OTP ERROR:", err);
+    return res.status(500).json({ ok: false, message: "Error verifying OTP" });
+  }
+};
 
-      res.json({ ok: true, seller });
-    } catch (err) {
-      return res.json({ ok: false, seller: null });
-    }
-  };
+// 📌 ONBOARD SELLER (SAVE DETAILS)
+exports.onboard = async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.user.id);
 
-  // ✅ SELLER BOOKINGS
-  exports.getSellerBookings = async (req, res) => {
-    try {
-      const sellerId = req.user?._id;
+    if (!seller)
+      return res.status(404).json({ ok: false, message: "Seller not found" });
 
-      if (!sellerId) {
-        return res.status(401).json({
-          ok: false,
-          message: "Unauthorized seller",
-        });
-      }
+    const { bizName, businessType, address, city, pincode, phone } = req.body;
 
-      const bookings = await Booking.find()
-        .populate({
-          path: "theatre",
-          match: { sellerId }, // ✅ FILTER HERE
-          select: "name sellerId",
-        })
-        .populate("screen", "name")
-        .sort({ createdAt: -1 });
+    seller.name = bizName;
+    seller.phone = phone || seller.phone;
+    seller.businessName = bizName;
+    seller.businessType = businessType;
+    seller.businessAddress = address;
+    seller.businessCity = city;
+    seller.businessPincode = pincode;
+    seller.isVerified = true;
 
-      // ✅ Remove bookings where theatre didn't match seller
-      const sellerBookings = bookings.filter((b) => b.theatre);
+    await seller.save();
 
-      res.json({
-        ok: true,
-        bookings: sellerBookings,
-        total: sellerBookings.length,
-      });
-    } catch (err) {
-      console.error("SELLER BOOKINGS ERROR:", err);
-      res.status(500).json({
-        ok: false,
-        message: "Failed to load seller bookings",
-      });
-    }
-  };
+    res.json({ ok: true, seller });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "Error onboarding" });
+  }
+};
 
+
+exports.getMe = async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.user.id);
+    if (!seller) return res.json({ ok: false, seller: null });
+
+    res.json({ ok: true, seller });
+  } catch (err) {
+    res.json({ ok: false, seller: null });
+  }
+};
+
+exports.getSellerBookings = async (req, res) => {
+  try {
+    const sellerId = req.user.id; // ✅ FIXED
+
+    const bookings = await Booking.find()
+      .populate({
+        path: "theatre",
+        match: { sellerId },
+        select: "name sellerId",
+      })
+      .populate("screen", "name")
+      .sort({ createdAt: -1 });
+
+    const sellerBookings = bookings.filter((b) => b.theatre);
+
+    res.json({
+      ok: true,
+      bookings: sellerBookings,
+      total: sellerBookings.length,
+    });
+  } catch (err) {
+    console.error("SELLER BOOKINGS ERROR:", err);
+    res.status(500).json({ ok: false, message: "Failed to load bookings" });
+  }
+};

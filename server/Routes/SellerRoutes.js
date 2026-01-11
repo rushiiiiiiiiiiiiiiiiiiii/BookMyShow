@@ -1,11 +1,20 @@
 const router = require("express").Router();
-const { sendOtp, verifyOtp, onboard, getMe, getSellerBookings} = require("../Controllers/SellerController");
-const authMiddleware = require("../Middlewears/auth");
+const {
+  sendOtp,
+  verifyOtp,
+  onboard,
+  getMe,
+  getSellerBookings,
+} = require("../Controllers/SellerController");
+
+const auth = require("../Middlewears/auth");
+const sellerAuth = require("../Middlewears/sellerAuth");
 
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
-router.post("/onboard", onboard);
-router.get("/me", getMe);
-router.get("/bookings", authMiddleware, getSellerBookings);
+
+router.post("/onboard", auth, sellerAuth, onboard);
+router.get("/me", auth, sellerAuth, getMe);
+router.get("/bookings", auth, sellerAuth, getSellerBookings);
 
 module.exports = router;
