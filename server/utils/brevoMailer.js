@@ -1,10 +1,10 @@
 const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const client = SibApiV3Sdk.ApiClient.instance;
+console.log("BREVO_API_KEY AT START:", process.env.BREVO_API_KEY);
 
 // 🔑 API KEY AUTH
-client.authentications["api-key"].apiKey =
-  process.env.BREVO_API_KEY;
+client.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 
 const transactionalApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
@@ -22,10 +22,7 @@ exports.sendOtpEmail = async ({ to, subject, html }) => {
 
     return response;
   } catch (error) {
-    console.error(
-      "BREVO MAIL ERROR:",
-      error.response?.body || error.message
-    );
+    console.error("BREVO MAIL ERROR:", error.response?.body || error.message);
     throw error;
   }
 };
