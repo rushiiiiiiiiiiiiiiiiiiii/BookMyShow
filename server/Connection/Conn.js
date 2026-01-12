@@ -4,7 +4,7 @@ console.log("Using DB:", process.env.MONGO_URL);
 
 const Conn = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MongoURL);
+    const conn = await mongoose.connect(process.env.MONGO_URL);
     console.log("Mongodb connected succesfully");
   } catch (err) {
     console.log(err);
