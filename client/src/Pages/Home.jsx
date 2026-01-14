@@ -258,7 +258,7 @@ export default function Home() {
     async function loadTheatres() {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/user/theatres?city=${city}`
+          `https://bookmyshow-backend-mzd2.onrender.com/api/user/theatres?city=${city}`
         );
 
         if (res.data.ok) {
@@ -283,7 +283,7 @@ export default function Home() {
         setLoading(true);
 
         const res = await axios.get(
-          `http://localhost:8000/api/user/shows?city=${city}`
+          `https://bookmyshow-backend-mzd2.onrender.com/api/user/shows?city=${city}`
         );
 
         const validShows = res.data.shows.filter(
