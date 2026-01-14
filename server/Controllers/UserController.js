@@ -39,74 +39,141 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
+    if (!email || !otp) {
+      return res.status(400).json({
+        ok: false,
+        message: "Email and OTP are required",
+      });
+    }
+
     const record = otpStore[email];
 
+    // OTP not found or mismatch
     if (!record || record.otp !== otp) {
-      return res.status(400).json({ ok: false, message: "Invalid OTP" });
+      return res.status(400).json({
+        ok: false,
+        message: "Invalid OTP",
+      });
     }
 
+    // OTP expired
     if (Date.now() > record.expires) {
       delete otpStore[email];
-      return res.status(400).json({ ok: false, message: "OTP expired" });
+      return res.status(400).json({
+        ok: false,
+        message: "OTP expired",
+      });
     }
 
+    // OTP verified → remove from store
     delete otpStore[email];
 
     let user = await User.findOne({ email });
     let isNewUser = false;
 
+    // Create user if not exists
     if (!user) {
       isNewUser = true;
       user = await User.create({
         email,
         isVerified: true,
-        role: "user", // default
+        role: "user", // default role
       });
     }
 
+    // Create JWT
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // ✅ IMPORTANT: role-based cookie
+    // Role-based cookie name
     const cookieName = user.role === "admin" ? "admin_token" : "token";
 
-    // production
+    /* ============================
+       PRODUCTION (HOSTED)
+    ============================ */
     res.cookie(cookieName, token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       path: "/",
-      // partitioned: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.json({
-      ok: true,
-      role: user.role,
-      isNewUser,
-    });
 
-    //local
+    /* ============================
+       LOCAL DEVELOPMENT
+    ============================ */
     // res.cookie(cookieName, token, {
     //   httpOnly: true,
     //   secure: false,
     //   sameSite: "lax",
     //   path: "/",
-    //   partitioned: true,
     //   maxAge: 7 * 24 * 60 * 60 * 1000,
     // });
-    // res.json({
-    //       ok: true,
-    //       role: user.role,
-    //       isNewUser,
-    //     });
+
+    return res.status(200).json({
+      ok: true,
+      role: user.role,
+      isNewUser,
+    });
   } catch (err) {
     console.error("VERIFY OTP ERROR:", err);
-    res.status(500).json({ ok: false, message: "Error verifying OTP" });
+    return res.status(500).json({
+      ok: false,
+      message: "Error verifying OTP",
+    });
   }
 };
+
+
+// LOGOUT (USER / ADMIN)
+exports.logout = async (req, res) => {
+  try {
+    // role from auth middleware (JWT payload)
+    const role = req.user?.role || "user";
+
+    // role-based cookie
+    const cookieName = role === "admin" ? "admin_token" : "token";
+
+    /* ============================
+       PRODUCTION (HOSTED)
+    ============================ */
+    res.clearCookie(cookieName, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    /* ============================
+       LOCAL DEVELOPMENT
+    ============================ */
+    // res.clearCookie(cookieName, {
+    //   httpOnly: true,
+    //   secure: false,
+    //   sameSite: "lax",
+    //   path: "/",
+    // });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Logged out successfully",
+    });
+  } catch (err) {
+    console.error("LOGOUT ERROR:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Logout failed",
+    });
+  }
+};
+
+
 
 // SET NAME
 exports.setName = async (req, res) => {
@@ -136,3 +203,5 @@ exports.getMe = async (req, res) => {
     res.json({ ok: false, message: "User not found" });
   }
 };
+
+// LOGOUT (USER / ADMIN)
