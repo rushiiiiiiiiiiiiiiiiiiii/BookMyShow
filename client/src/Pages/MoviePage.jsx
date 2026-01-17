@@ -4,6 +4,7 @@ import axios from "axios";
 import { Clock, Globe, BadgeCheck, Star } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { toast } from "react-hot-toast";
 
 const BMS_BTN =
   "bg-[#f84464] hover:bg-[#e43a57] active:bg-[#d6334f] transition-all duration-200";
@@ -77,16 +78,16 @@ export default function MoviePage() {
 
   const visibleReviews = reviews.slice(0, 4);
 
- if (loading) {
-     return (
-       <>
-         <Navbar/>
-         <div className="min-h-[70vh] flex items-center justify-center">
-           <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
-         </div>
-       </>
-     );
-   }
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+        </div>
+      </>
+    );
+  }
 
   if (!movie) {
     return (
@@ -189,21 +190,44 @@ export default function MoviePage() {
           <button
             className={`${BMS_BTN} px-6 py-2 text-white rounded-lg`}
             onClick={async () => {
-              await axios.post(
-                "https://bookmyshow-backend-mzd2.onrender.com/api/reviews",
-                { movie: movie.movie, rating, comment },
-                { withCredentials: true },
-              );
+              if (!comment.trim()) {
+                toast.error("Please write a review before submitting");
+                return;
+              }
 
-              setComment("");
-              setRating(5);
+              try {
+                await axios.post(
+                  "https://bookmyshow-backend-mzd2.onrender.com/api/reviews",
+                  { movie: movie.movie, rating, comment },
+                  { withCredentials: true },
+                );
 
-              const reviewRes = await axios.get(
-                `https://bookmyshow-backend-mzd2.onrender.com/api/reviews/${encodeURIComponent(
-                  movie.movie,
-                )}`,
-              );
-              setReviews(reviewRes.data.reviews);
+                toast.success("Review submitted successfully 🎉");
+
+                setComment("");
+                setRating(5);
+
+                const reviewRes = await axios.get(
+                  `https://bookmyshow-backend-mzd2.onrender.com/api/reviews/${encodeURIComponent(
+                    movie.movie,
+                  )}`,
+                );
+
+                setReviews(reviewRes.data.reviews);
+              } catch (err) {
+                // 🔐 NOT LOGGED IN
+                if (err.response?.status === 401) {
+                  toast.error("Please login to submit a review");
+                  navigate("/register"); // or "/login"
+                  return;
+                }
+
+                // ❌ OTHER ERRORS
+                toast.error(
+                  err.response?.data?.message ||
+                    "Failed to submit review. Please try again.",
+                );
+              }
             }}
           >
             Submit Review
