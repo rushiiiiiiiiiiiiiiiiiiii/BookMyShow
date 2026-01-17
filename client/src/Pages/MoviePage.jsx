@@ -23,6 +23,7 @@ export default function MoviePage() {
   const [suggested, setSuggested] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
+
   useEffect(() => {
     async function load() {
       const res = await axios.get(
@@ -106,70 +107,82 @@ export default function MoviePage() {
       <Navbar />
 
       {/* HERO */}
-      {/* HERO */}
-      <div
-        className="relative h-[360px] sm:h-[400px] md:h-[440px] bg-cover bg-center"
-        style={{ backgroundImage: `url(${movie.poster})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/40"></div>
+     {/* HERO */}
+<div
+  className="
+    relative
+    h-[420px]
+    sm:h-[400px]
+    md:h-[440px]
+    bg-cover
+    bg-center
+  "
+  style={{ backgroundImage: `url(${movie.poster})` }}
+>
+  {/* DARK OVERLAY */}
+  <div className="absolute inset-0 bg-black/70 sm:bg-gradient-to-t sm:from-black sm:via-black/80 sm:to-black/40"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-end pb-6 sm:pb-10">
-          <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-center sm:items-end w-full">
-            {/* POSTER */}
-            <img
-              src={movie.poster}
-              alt={movie.movie}
-              className="
-          h-56 w-40
-          sm:h-72 sm:w-48
-          md:h-80 md:w-56
-          object-cover
-          rounded-2xl
-          shadow-2xl
-          border border-white/10
-        "
-            />
+  {/* CONTENT */}
+  <div className="relative h-full flex flex-col items-center justify-center sm:justify-end px-4 sm:px-6 pb-6 sm:pb-10">
 
-            {/* DETAILS */}
-            <div className="text-white max-w-xl text-center sm:text-left pb-4 sm:pb-20">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
-                {movie.movie}
-              </h1>
+    {/* POSTER */}
+    <img
+      src={movie.poster}
+      alt={movie.movie}
+      className="
+        h-56 w-40
+        sm:h-72 sm:w-48
+        md:h-80 md:w-56
+        object-cover
+        rounded-2xl
+        shadow-[0_20px_40px_rgba(0,0,0,0.7)]
+        border border-white/10
+        mb-5 sm:mb-0
+      "
+    />
 
-              <div className="flex flex-wrap justify-center sm:justify-start gap-4 sm:gap-5 items-center text-xs sm:text-sm text-gray-200 mb-3">
-                <span className="flex gap-1 items-center">
-                  <Clock size={14} /> {movie.durationMinutes} mins
-                </span>
-                <span className="flex gap-1 items-center">
-                  <Globe size={14} /> {movie.language}
-                </span>
-                <span className="flex gap-1 items-center">
-                  <BadgeCheck size={14} /> {movie.certificate}
-                </span>
-              </div>
+    {/* DETAILS */}
+    <div className="text-white text-center sm:text-left sm:max-w-xl sm:self-start sm:ml-[220px]">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+        {movie.movie}
+      </h1>
 
-              <p className="text-xs sm:text-sm text-gray-300 mb-4 sm:mb-6">
-                {movie.format} • Subtitles: {movie.isSubtitled ? "Yes" : "No"}
-              </p>
-
-              <button
-                className={`
-            ${BMS_BTN}
-            w-full sm:w-auto
-            px-6 sm:px-8
-            py-3
-            rounded-lg
-            text-white
-            font-semibold
-          `}
-                onClick={() => navigate(`/buytickets/${movie.movie}`)}
-              >
-                Book Tickets
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center sm:justify-start gap-4 text-xs sm:text-sm text-gray-300 mb-2">
+        <span className="flex items-center gap-1">
+          <Clock size={14} /> {movie.durationMinutes} mins
+        </span>
+        <span className="flex items-center gap-1">
+          <Globe size={14} /> {movie.language}
+        </span>
+        <span className="flex items-center gap-1">
+          <BadgeCheck size={14} /> {movie.certificate}
+        </span>
       </div>
+
+      <p className="text-xs sm:text-sm text-gray-400 mb-4">
+        {movie.format} • Subtitles: {movie.isSubtitled ? "Yes" : "No"}
+      </p>
+
+      <button
+        className={`
+          ${BMS_BTN}
+          w-full sm:w-auto
+          px-8
+          py-3
+          rounded-xl
+          text-white
+          font-semibold
+          text-base
+          shadow-lg
+        `}
+        onClick={() => navigate(`/buytickets/${movie.movie}`)}
+      >
+        Book Tickets
+      </button>
+    </div>
+  </div>
+</div>
+
 
       {/* ABOUT */}
       <div className="max-w-7xl mx-auto px-6 mt-10">
@@ -210,60 +223,61 @@ export default function MoviePage() {
           />
 
           <button
-            disabled={submitting}
-            className={`${BMS_BTN} px-6 py-2 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-70`}
-            onClick={async () => {
-              if (!comment.trim()) {
-                toast.error("Please write a review before submitting");
-                return;
-              }
+  disabled={submitting}
+  className={`${BMS_BTN} px-6 py-2 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-70`}
+  onClick={async () => {
+    if (!comment.trim()) {
+      toast.error("Please write a review before submitting");
+      return;
+    }
 
-              try {
-                setSubmitting(true);
+    try {
+      setSubmitting(true);
 
-                await axios.post(
-                  "https://bookmyshow-backend-mzd2.onrender.com/api/reviews",
-                  { movie: movie.movie, rating, comment },
-                  { withCredentials: true },
-                );
+      await axios.post(
+        "https://bookmyshow-backend-mzd2.onrender.com/api/reviews",
+        { movie: movie.movie, rating, comment },
+        { withCredentials: true },
+      );
 
-                toast.success("Review submitted successfully 🎉");
+      toast.success("Review submitted successfully 🎉");
 
-                setComment("");
-                setRating(5);
+      setComment("");
+      setRating(5);
 
-                const reviewRes = await axios.get(
-                  `https://bookmyshow-backend-mzd2.onrender.com/api/reviews/${encodeURIComponent(
-                    movie.movie,
-                  )}`,
-                );
+      const reviewRes = await axios.get(
+        `https://bookmyshow-backend-mzd2.onrender.com/api/reviews/${encodeURIComponent(
+          movie.movie,
+        )}`,
+      );
 
-                setReviews(reviewRes.data.reviews);
-              } catch (err) {
-                if (err.response?.status === 401) {
-                  toast.error("Please login to submit a review");
-                  navigate("/register");
-                  return;
-                }
+      setReviews(reviewRes.data.reviews);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        toast.error("Please login to submit a review");
+        navigate("/register");
+        return;
+      }
 
-                toast.error(
-                  err.response?.data?.message ||
-                    "Failed to submit review. Please try again.",
-                );
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
-                Submitting...
-              </>
-            ) : (
-              "Submit Review"
-            )}
-          </button>
+      toast.error(
+        err.response?.data?.message ||
+          "Failed to submit review. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }}
+>
+  {submitting ? (
+    <>
+      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+      Submitting...
+    </>
+  ) : (
+    "Submit Review"
+  )}
+</button>
+
         </div>
       </div>
 
