@@ -158,17 +158,63 @@ export default function PaymentPage() {
             </div>
 
             <div className="flex-1 p-4 sm:p-6">
-              <h3 className="font-bold mb-4">Pay using {activeMethod}</h3>
-              <p className="text-sm text-gray-500">
-                Payment gateway simulation only
+              <h3 className="font-bold text-lg mb-1">
+                Pay using {activeMethod}
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Complete your payment securely
               </p>
+
+              {/* PAYMENT METHOD UI */}
+              {activeMethod === "UPI" && (
+                <div className="space-y-3">
+                  <input
+                    placeholder="Enter UPI ID (example@upi)"
+                    className="w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#f84464] outline-none"
+                  />
+                  <p className="text-xs text-gray-500">
+                    You’ll be redirected to your UPI app
+                  </p>
+                </div>
+              )}
+
+              {activeMethod === "CARD" && (
+                <div className="grid gap-3">
+                  <input
+                    placeholder="Card Number"
+                    className="border rounded-lg px-4 py-3 text-sm"
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      placeholder="MM / YY"
+                      className="border rounded-lg px-4 py-3 text-sm"
+                    />
+                    <input
+                      placeholder="CVV"
+                      className="border rounded-lg px-4 py-3 text-sm"
+                    />
+                  </div>
+                  <input
+                    placeholder="Card Holder Name"
+                    className="border rounded-lg px-4 py-3 text-sm"
+                  />
+                </div>
+              )}
+
+              {["WALLET", "NETBANK", "GIFT", "PREFERRED"].includes(
+                activeMethod,
+              ) && (
+                <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-600">
+                  You’ll be redirected to complete payment securely.
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* RIGHT SUMMARY */}
         <div className="lg:col-span-4">
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="bg-white rounded-lg shadow p-4 mb-6 lg:mb-0">
             <h2 className="font-bold">{show.movie}</h2>
             <p className="text-xs text-gray-600 mt-1">
               {new Date(show.date).toDateString()} · {show.time}
@@ -186,15 +232,19 @@ export default function PaymentPage() {
               <span>Total</span>
               <span>₹{finalTotal}</span>
             </div>
+
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              100% secure payments · Powered by BookMyShow
+            </p>
           </div>
 
-          <div className="lg:static fixed bottom-0 left-0 right-0 bg-white p-4 lg:p-0 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] lg:shadow-none">
+          <div className="lg:static fixed bottom-0 left-0 right-0 bg-white p-4 lg:p-0 shadow-[0_-8px_24px_rgba(0,0,0,0.15)] lg:shadow-none">
             <button
               disabled={loading}
               onClick={handlePayment}
               className="w-full bg-[#f84464] hover:bg-[#e43a57] text-white py-3 rounded-lg font-bold shadow"
             >
-              {loading ? "Processing..." : `PROCEED TO PAY ₹ ${finalTotal}`}
+              {loading ? "Processing..." : `Pay ₹ ${finalTotal}`}
             </button>
           </div>
         </div>
@@ -207,9 +257,9 @@ function SidebarItem({ icon, label, active, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer whitespace-nowrap ${
+      className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer whitespace-nowrap transition ${
         active
-          ? "bg-[#fdecef] font-semibold text-[#f84464]"
+          ? "bg-[#fdecef] font-semibold text-[#f84464] border-l-4 border-[#f84464]"
           : "hover:bg-gray-100"
       }`}
     >
