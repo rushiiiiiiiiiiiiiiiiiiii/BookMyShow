@@ -198,13 +198,16 @@ export default function SeatPage() {
   // -------------------------
   // LOADING
   // -------------------------
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-[5px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+ if (loading) {
+     return (
+       <>
+         {/* <Navbar /> */}
+         <div className="min-h-[70vh] flex items-center justify-center">
+           <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+         </div>
+       </>
+     );
+   }
   if (!screen || !show) {
     return <div className="p-10 text-center">Failed to load seat layout</div>;
   }
@@ -221,7 +224,7 @@ export default function SeatPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+      {/* <Navbar /> */}
 
       {/* ===================
            🎬 MOVIE HEADER

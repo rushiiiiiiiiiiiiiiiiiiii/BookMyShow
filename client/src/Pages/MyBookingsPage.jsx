@@ -26,8 +26,16 @@ export default function MyBookingsPage() {
     load();
   }, []);
 
-  if (loading)
-    return <div className="p-10 text-center">Loading your bookings...</div>;
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="bg-[#f5f5f5] min-h-screen">

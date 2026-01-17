@@ -131,6 +131,14 @@ export function Hero() {
 
 // TITLE
 
+function SectionLoader() {
+  return (
+    <div className="flex justify-center py-16">
+      <div className="w-10 h-10 border-[3px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
 function SectionTitle({ title, viewAllTo }) {
   const navigate = useNavigate();
 
@@ -322,13 +330,16 @@ export default function Home() {
     load();
   }, [city]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-[5px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <>
+  //       <Navbar />
+  //       <div className="min-h-[70vh] flex items-center justify-center">
+  //         <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+  //       </div>
+  //     </>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -341,15 +352,22 @@ export default function Home() {
         viewAllTo="/shows?type=movies"
       />
 
-      <div className="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto pb-6">
-        {carouselMovies.length === 0 ? (
+      <div className="max-w-7xl mx-auto px-4 overflow-x-auto pb-6">
+        {loading ? (
+          <SectionLoader />
+        ) : carouselMovies.length === 0 ? (
           <div className="text-gray-500 text-sm py-10">
             No movies available in {city} right now
           </div>
         ) : (
-          carouselMovies.map((m, i) => <MovieCard key={i} m={m} />)
+          <div className="flex gap-6">
+            {carouselMovies.map((m, i) => (
+              <MovieCard key={i} m={m} />
+            ))}
+          </div>
         )}
       </div>
+
       {/* STREAM PROMO BANNER */}
       <div className="max-w-7xl mx-auto px-4 my-10">
         <div className="rounded-xl overflow-hidden cursor-pointer">
@@ -426,10 +444,20 @@ export default function Home() {
         viewAllTo="/shows?type=recommended"
       />
 
-      <div className="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto pb-10">
-        {randomRecommended.map((m, i) => (
-          <MovieCard key={i} m={m} />
-        ))}
+      <div className="max-w-7xl mx-auto px-4 overflow-x-auto pb-10">
+        {loading ? (
+          <SectionLoader />
+        ) : randomRecommended.length === 0 ? (
+          <div className="text-gray-500 text-sm py-10">
+            No recommendations available
+          </div>
+        ) : (
+          <div className="flex gap-6">
+            {randomRecommended.map((m, i) => (
+              <MovieCard key={i} m={m} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />

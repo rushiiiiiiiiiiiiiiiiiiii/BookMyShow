@@ -8,6 +8,8 @@ export default function UserShows() {
   const city = localStorage.getItem("city") || "Mumbai";
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
 
   const params = new URLSearchParams(location.search);
   const type = params.get("type") || "movies";
@@ -26,22 +28,39 @@ export default function UserShows() {
   /* =========================
      LOAD SHOWS (FOR MOVIES)
   ========================= */
-  async function loadShows() {
+async function loadShows() {
+  try {
+    setLoading(true);
     const res = await axios.get(
-      `https://bookmyshow-backend-mzd2.onrender.com/api/user/shows?city=${city}`,
+      `https://bookmyshow-backend-mzd2.onrender.com/api/user/shows?city=${city}`
     );
     if (res.data.ok) setShows(res.data.shows);
+  } catch (err) {
+    console.error("Failed to load shows", err);
+    setShows([]);
+  } finally {
+    setLoading(false);
   }
+}
 
   /* =========================
      LOAD THEATRES (ALL)
   ========================= */
-  async function loadTheatres() {
+async function loadTheatres() {
+  try {
+    setLoading(true);
     const res = await axios.get(
-      `https://bookmyshow-backend-mzd2.onrender.com/api/user/theatres?city=${city}`,
+      `https://bookmyshow-backend-mzd2.onrender.com/api/user/theatres?city=${city}`
     );
     if (res.data.ok) setTheatres(res.data.theatres);
+  } catch (err) {
+    console.error("Failed to load theatres", err);
+    setTheatres([]);
+  } finally {
+    setLoading(false);
   }
+}
+
 
   /* =========================
      MOVIES (DEDUPED)
@@ -58,6 +77,16 @@ export default function UserShows() {
     }
   });
   const movies = Object.values(moviesMap);
+if (loading) {
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+      </div>
+    </>
+  );
+}
 
   return (
     <>

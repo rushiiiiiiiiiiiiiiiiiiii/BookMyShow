@@ -40,12 +40,14 @@ export default function BuyTicketsPage() {
   }, [decodedName]);
 
   const filteredShows = shows.filter((s) => s.date === activeDate);
-
-  if (loading) {
+if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-[5px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
-      </div>
+      <>
+        <Navbar />
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+        </div>
+      </>
     );
   }
   return (
