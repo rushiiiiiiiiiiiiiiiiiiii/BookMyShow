@@ -149,7 +149,7 @@ exports.createBooking = async (req, res) => {
 // ===================================
 exports.getMyBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id })
+    const bookings = await Booking.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .populate("theatre", "name city")
       .populate("screen", "name");
@@ -274,7 +274,7 @@ exports.getBooking = async (req, res) => {
 // // ===================================
 // exports.getMyBookings = async (req, res) => {
 //   try {
-//     const bookings = await Booking.find({ user: req.user._id })
+//     const bookings = await Booking.find({ user: req.user.id })
 //       .sort({ createdAt: -1 })
 //       .populate("theatre", "name city")
 //       .populate("screen", "name");
