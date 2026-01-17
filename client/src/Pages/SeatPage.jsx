@@ -84,21 +84,17 @@ export default function SeatPage() {
   async function loadSeatData() {
     try {
       const showRes = await axios.get(
-        `https://bookmyshow-backend-mzd2.onrender.com/api/shows/${id}`
+        `https://bookmyshow-backend-mzd2.onrender.com/api/shows/${id}`,
       );
       if (showRes.data.ok) setShow(showRes.data.show);
 
       const seatRes = await axios.get(
-        `https://bookmyshow-backend-mzd2.onrender.com/api/user/seats/${id}`
+        `https://bookmyshow-backend-mzd2.onrender.com/api/user/seats/${id}`,
       );
 
       if (seatRes.data.ok) {
-        const bookedArr = (seatRes.data.booked || []).map(
-          (s) => s.seatNumber
-        );
-        const lockedArr = (seatRes.data.locked || []).map(
-          (s) => s.seatNumber
-        );
+        const bookedArr = (seatRes.data.booked || []).map((s) => s.seatNumber);
+        const lockedArr = (seatRes.data.locked || []).map((s) => s.seatNumber);
         setBooked([...new Set([...bookedArr, ...lockedArr])]);
         setScreen(seatRes.data.screen);
       }
@@ -143,7 +139,7 @@ export default function SeatPage() {
       const res = await axios.post(
         "https://bookmyshow-backend-mzd2.onrender.com/api/lock-seats",
         { showId: id, seats: newSelected },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (!res.data.ok) {
@@ -228,9 +224,9 @@ export default function SeatPage() {
         </div>
 
         {/* SEATS */}
-        <div className="flex flex-col items-center overflow-x-auto pb-6">
+        <div className="flex flex-col items-start overflow-x-auto pb-6 px-2">
           {rows.split("").map((r) => (
-            <div key={r} className="flex items-center mb-2 min-w-max">
+            <div key={r} className="flex items-center mb-2 min-w-max pl-1">
               <span className="w-6 text-right mr-3 text-xs text-gray-500">
                 {r}
               </span>
@@ -256,9 +252,7 @@ export default function SeatPage() {
                     booked={booked}
                     selected={selected}
                     toggleSeat={toggleSeat}
-                    loading={lockingSeats.includes(
-                      `${r}${leftSeats + i + 1}`
-                    )}
+                    loading={lockingSeats.includes(`${r}${leftSeats + i + 1}`)}
                   />
                 ))}
               </div>
