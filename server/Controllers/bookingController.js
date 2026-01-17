@@ -61,7 +61,7 @@ exports.lockSeats = async (req, res) => {
     // ✅ Lock seats in Redis (5 min TTL)
     for (const seat of seats) {
       const key = `lock:${showId}:${seat}`;
-      await redis.set(key, userId.toString(), { EX: 300 });
+      await redis.set(key, userId.toString(), { ex: 300 });
     }
 
     res.json({
