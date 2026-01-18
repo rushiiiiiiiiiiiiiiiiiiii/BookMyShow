@@ -45,7 +45,7 @@ function AdminNavbar() {
           credentials: "include",
         },
       );
-      window.location.href = "/register"; 
+      window.location.replace("/register");
     } catch (err) {
       console.error("Admin logout failed", err);
     }
