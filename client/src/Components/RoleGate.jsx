@@ -8,6 +8,23 @@ export default function RoleGate({ children }) {
   useEffect(() => {
     async function detectRole() {
       try {
+        // 1️⃣ Check SELLER first
+        const sellerRes = await fetch(
+          "https://bookmyshow-backend-mzd2.onrender.com/api/seller/me",
+          {
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
+
+        const sellerData = await sellerRes.json();
+
+        if (sellerData.ok) {
+          setRole("seller");
+          return;
+        }
+
+        // 2️⃣ Check USER / ADMIN
         const res = await fetch(
           "https://bookmyshow-backend-mzd2.onrender.com/auth/me",
           {
@@ -17,8 +34,9 @@ export default function RoleGate({ children }) {
         );
 
         const data = await res.json();
+
         if (data.ok) {
-          setRole(data.user.role);
+          setRole(data.user.role); // user | admin
         } else {
           setRole("guest");
         }
@@ -35,12 +53,13 @@ export default function RoleGate({ children }) {
   const path = location.pathname;
 
   // 🚫 GUEST → block admin & seller EXCEPT seller auth pages
+  // 🚫 GUEST → block admin & seller EXCEPT seller auth pages
   if (
     role === "guest" &&
     (path.startsWith("/admin") ||
       (path.startsWith("/seller") &&
         !path.startsWith("/seller/signin") &&
-        !path.startsWith("/seller/signup")))
+        !path.startsWith("/seller/onboard")))
   ) {
     return <Navigate to="/register" replace />;
   }

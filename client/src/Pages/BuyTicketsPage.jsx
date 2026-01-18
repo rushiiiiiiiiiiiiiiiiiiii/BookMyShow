@@ -92,7 +92,7 @@ if (loading) {
 
       {/* DATE STRIP */}
       <div className="bg-white mt-2  w-[95%] m-auto">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-3 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-3 overflow-x-auto  hide-scrollbar">
           {dates.map((date) => {
             const isActive = activeDate === date;
             return (
