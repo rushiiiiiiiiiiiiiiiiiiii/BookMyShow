@@ -38,7 +38,12 @@ export default function MovieReviewsPage() {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-gray-500">Loading reviews...</div>
+      <>
+        <Navbar />
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="w-14 h-14 border-[4px] border-[#f84464]/20 border-t-[#f84464] rounded-full animate-spin"></div>
+        </div>
+      </>
     );
   }
 
