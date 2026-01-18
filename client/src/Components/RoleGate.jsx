@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
-
+import React from 'react'
 const PUBLIC_PATHS = ["/", "/register", "/login"];
 
 export default function RoleGate({ children }) {
