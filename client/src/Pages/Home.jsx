@@ -156,7 +156,6 @@ function SectionTitle({ title, viewAllTo }) {
   );
 }
 
-// MOVIE CARD (UNCHANGED)
 function MovieCard({ m }) {
   const navigate = useNavigate();
 
@@ -168,7 +167,7 @@ function MovieCard({ m }) {
   return (
     <div
       onClick={goToMovie}
-      className="w-[180px] sm:w-[220px] cursor-pointer transition hover:scale-105"
+      className="cursor-pointer transition hover:scale-105"
     >
       <div className="h-72 rounded-xl overflow-hidden shadow-lg">
         <img
@@ -352,7 +351,7 @@ export default function Home() {
         viewAllTo="/shows?type=movies"
       />
 
-      <div className="max-w-7xl mx-auto px-4 overflow-x-auto pb-6">
+      <div className="max-w-7xl mx-auto px-4 pb-6">
         {loading ? (
           <SectionLoader />
         ) : carouselMovies.length === 0 ? (
@@ -360,8 +359,18 @@ export default function Home() {
             No movies available in {city} right now
           </div>
         ) : (
-          <div className="flex gap-6">
-            {carouselMovies.map((m, i) => (
+          <div
+            className="
+        grid 
+        grid-cols-2 
+        sm:grid-cols-3 
+        lg:grid-cols-6
+        gap-6
+        max-h-[620px]
+        overflow-hidden
+      "
+          >
+            {carouselMovies.slice(0, 12).map((m, i) => (
               <MovieCard key={i} m={m} />
             ))}
           </div>
