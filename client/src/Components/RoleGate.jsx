@@ -5,10 +5,19 @@ const PUBLIC_PATHS = ["/", "/register", "/login"];
 
 export default function RoleGate({ children }) {
   const location = useLocation();
+
   const [role, setRole] = useState("loading");
-  const [ready, setReady] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // ⏳ Allow cookies to hydrate
+  useEffect(() => {
+    const t = setTimeout(() => setHydrated(true), 600);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     async function detectRole() {
       try {
         // 1️⃣ ADMIN / USER
@@ -24,7 +33,6 @@ export default function RoleGate({ children }) {
 
         if (authData.ok) {
           setRole(authData.user.role); // admin | user
-          setReady(true);
           return;
         }
 
@@ -41,34 +49,31 @@ export default function RoleGate({ children }) {
 
         if (sellerData.ok) {
           setRole("seller");
-          setReady(true);
           return;
         }
 
         // 3️⃣ GUEST
         setRole("guest");
-        setReady(true);
       } catch {
         setRole("guest");
-        setReady(true);
       }
     }
 
     detectRole();
-  }, []);
+  }, [hydrated]);
 
-  if (!ready) return null;
+  if (!hydrated || role === "loading") return null;
 
   const path = location.pathname;
 
   /* ───────── ADMIN RULES ───────── */
 
-  // Block non-admin from admin pages
+  // Non-admin accessing admin pages
   if (path.startsWith("/admin") && role !== "admin") {
     return <Navigate to="/register" replace />;
   }
 
-  // ❗ DO NOT force admin redirect from public pages
+  // Admin landing redirect (AFTER hydration)
   if (
     role === "admin" &&
     !path.startsWith("/admin") &&
@@ -87,7 +92,7 @@ export default function RoleGate({ children }) {
   }
 
   /* ───────── SELLER RULES ───────── */
-  // Seller handled by SellerProtectedRoute ONLY
+  // Seller routes protected elsewhere
 
   return children;
 }
