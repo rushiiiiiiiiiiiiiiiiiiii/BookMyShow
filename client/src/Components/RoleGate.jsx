@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
-import React from 'react'
+
+const PUBLIC_PATHS = ["/", "/register", "/login"];
+
 export default function RoleGate({ children }) {
   const location = useLocation();
   const [role, setRole] = useState("loading");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     async function detectRole() {
       try {
-        // 1️⃣ CHECK ADMIN / USER FIRST
+        // 1️⃣ ADMIN / USER
         const authRes = await fetch(
           "https://bookmyshow-backend-mzd2.onrender.com/auth/me",
           {
@@ -20,11 +23,12 @@ export default function RoleGate({ children }) {
         const authData = await authRes.json();
 
         if (authData.ok) {
-          setRole(authData.user.role); // "admin" | "user"
+          setRole(authData.user.role); // admin | user
+          setReady(true);
           return;
         }
 
-        // 2️⃣ CHECK SELLER
+        // 2️⃣ SELLER
         const sellerRes = await fetch(
           "https://bookmyshow-backend-mzd2.onrender.com/api/seller/me",
           {
@@ -37,33 +41,44 @@ export default function RoleGate({ children }) {
 
         if (sellerData.ok) {
           setRole("seller");
+          setReady(true);
           return;
         }
 
         // 3️⃣ GUEST
         setRole("guest");
+        setReady(true);
       } catch {
         setRole("guest");
+        setReady(true);
       }
     }
 
     detectRole();
   }, []);
 
-  if (role === "loading") return null;
+  if (!ready) return null;
 
   const path = location.pathname;
 
   /* ───────── ADMIN RULES ───────── */
-  if (role !== "admin" && path.startsWith("/admin")) {
+
+  // Block non-admin from admin pages
+  if (path.startsWith("/admin") && role !== "admin") {
     return <Navigate to="/register" replace />;
   }
 
-  if (role === "admin" && !path.startsWith("/admin")) {
+  // ❗ DO NOT force admin redirect from public pages
+  if (
+    role === "admin" &&
+    !path.startsWith("/admin") &&
+    !PUBLIC_PATHS.includes(path)
+  ) {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
   /* ───────── USER RULES ───────── */
+
   if (
     role === "user" &&
     (path.startsWith("/admin") || path.startsWith("/seller"))
@@ -72,8 +87,7 @@ export default function RoleGate({ children }) {
   }
 
   /* ───────── SELLER RULES ───────── */
-  // Seller routes are protected by SellerProtectedRoute
-  // DO NOT block seller here
+  // Seller handled by SellerProtectedRoute ONLY
 
   return children;
 }
