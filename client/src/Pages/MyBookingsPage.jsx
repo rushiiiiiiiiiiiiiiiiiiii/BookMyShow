@@ -8,12 +8,15 @@ import {
   XCircle,
   X,
   QrCode,
+  History,
+  Ticket,
 } from "lucide-react";
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeBooking, setActiveBooking] = useState(null);
+  const [activeTab, setActiveTab] = useState("recent"); // 'recent' or 'history'
 
   useEffect(() => {
     async function load() {
@@ -32,6 +35,20 @@ export default function MyBookingsPage() {
     load();
   }, []);
 
+  // --- LOGIC TO SPLIT BOOKINGS ---
+  const now = new Date();
+
+  const isExpired = (booking) => {
+    // Combine date and time string to create a comparable Date object
+    const showDateTime = new Date(`${booking.date.split("T")[0]}T${booking.time}`);
+    return showDateTime < now || booking.status === "cancelled";
+  };
+
+  const recentBookings = bookings.filter((b) => !isExpired(b));
+  const historyBookings = bookings.filter((b) => isExpired(b));
+
+  const displayBookings = activeTab === "recent" ? recentBookings : historyBookings;
+
   if (loading) {
     return (
       <>
@@ -48,21 +65,46 @@ export default function MyBookingsPage() {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6">
-          My Bookings
-        </h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-6">My Bookings</h1>
 
-        {bookings.length === 0 && (
-          <div className="bg-white rounded-xl p-6 text-center text-gray-500 shadow">
-            You have no bookings yet 🍿
+        {/* CLICKABLE TAB SECTIONS */}
+        <div className="flex gap-8 mb-6 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("recent")}
+            className={`pb-3 flex items-center gap-2 font-semibold transition-all ${
+              activeTab === "recent"
+                ? "border-b-2 border-[#f84464] text-[#f84464]"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Ticket size={18} /> Recent
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`pb-3 flex items-center gap-2 font-semibold transition-all ${
+              activeTab === "history"
+                ? "border-b-2 border-[#f84464] text-[#f84464]"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <History size={18} /> History
+          </button>
+        </div>
+
+        {displayBookings.length === 0 && (
+          <div className="bg-white rounded-xl p-10 text-center text-gray-500 shadow-sm">
+            {activeTab === "recent" 
+              ? "You have no upcoming shows 🍿" 
+              : "Your booking history is empty."}
           </div>
         )}
 
         <div className="space-y-4">
-          {bookings.map((b) => (
+          {displayBookings.map((b) => (
             <BookingCard
               key={b._id}
               booking={b}
+              isHistory={activeTab === "history"}
               onView={() => setActiveBooking(b)}
             />
           ))}
@@ -73,6 +115,7 @@ export default function MyBookingsPage() {
       {activeBooking && (
         <TicketModal
           booking={activeBooking}
+          isHistory={isExpired(activeBooking)}
           onClose={() => setActiveBooking(null)}
         />
       )}
@@ -84,9 +127,12 @@ export default function MyBookingsPage() {
      BOOKING CARD
 ========================= */
 
-function BookingCard({ booking, onView }) {
+function BookingCard({ booking, onView, isHistory }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
+    <div 
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden 
+      ${isHistory ? "grayscale opacity-75 border-gray-200" : "border-transparent"}`}
+    >
       <div className="flex flex-col sm:flex-row">
         <img
           src={booking.poster}
@@ -105,7 +151,7 @@ function BookingCard({ booking, onView }) {
               </p>
             </div>
 
-            <StatusBadge status={booking.status} />
+            <StatusBadge status={booking.status} isHistory={isHistory} />
           </div>
 
           <div className="mt-3 text-sm text-gray-600 space-y-1">
@@ -130,12 +176,12 @@ function BookingCard({ booking, onView }) {
         </div>
       </div>
 
-      <div className="border-t px-4 py-3 text-right">
+      <div className="border-t px-4 py-3 text-right bg-gray-50/50">
         <button
           onClick={onView}
-          className="text-[#f84464] text-sm font-semibold hover:underline"
+          className={`${isHistory ? "text-gray-600" : "text-[#f84464]"} text-sm font-semibold hover:underline`}
         >
-          View Ticket
+          {isHistory ? "View Summary" : "View Ticket"}
         </button>
       </div>
     </div>
@@ -146,10 +192,10 @@ function BookingCard({ booking, onView }) {
      TICKET MODAL
 ========================= */
 
-function TicketModal({ booking, onClose }) {
+function TicketModal({ booking, onClose, isHistory }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4 backdrop-blur-sm">
+      <div className={`bg-white w-full max-w-md rounded-3xl shadow-2xl relative overflow-hidden transition-all ${isHistory ? 'grayscale' : ''}`}>
         {/* CLOSE */}
         <button
           onClick={onClose}
@@ -179,7 +225,6 @@ function TicketModal({ booking, onClose }) {
 
         {/* TICKET BODY */}
         <div className="p-5 space-y-4">
-          {/* DATE / TIME */}
           <div className="flex justify-between text-sm">
             <div>
               <p className="text-gray-500 text-xs">Date</p>
@@ -193,7 +238,6 @@ function TicketModal({ booking, onClose }) {
             </div>
           </div>
 
-          {/* SEATS */}
           <div className="flex justify-between text-sm">
             <div>
               <p className="text-gray-500 text-xs">Seats</p>
@@ -207,33 +251,35 @@ function TicketModal({ booking, onClose }) {
             </div>
           </div>
 
-          {/* DIVIDER (PERFORATION STYLE) */}
+          {/* PERFORATION DIVIDER */}
           <div className="relative my-3">
-            <div className="border-t border-dashed" />
-            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#f5f5f5] rounded-full" />
-            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#f5f5f5] rounded-full" />
+            <div className="border-t border-dashed border-gray-300" />
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-800/20 rounded-full" />
+            <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-800/20 rounded-full" />
           </div>
 
           {/* QR / TOKEN */}
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-xl border bg-gray-50 mx-auto">
-              <QrCode size={44} className="text-gray-700" />
-            </div>
-
-            <p className="text-xs text-gray-500 mt-2">
-              Show this code at the entrance
-            </p>
-
-            <p className="mt-1 font-mono text-sm font-bold tracking-wide">
-              {booking.bookingToken}
-            </p>
+            {isHistory ? (
+              <div className="py-4">
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-lg border-2 border-dashed border-gray-300 inline-block px-4 py-1">
+                  Expired
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-xl border bg-gray-50 mx-auto">
+                  <QrCode size={44} className="text-gray-700" />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Show this code at entrance</p>
+                <p className="mt-1 font-mono text-sm font-bold tracking-wide">{booking.bookingToken}</p>
+              </>
+            )}
           </div>
 
           {/* STATUS */}
           <div className="flex justify-center pt-2">
-            <span className="flex items-center gap-1 bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
-              <CheckCircle size={14} /> Booking Confirmed
-            </span>
+            <StatusBadge status={booking.status} isHistory={isHistory} />
           </div>
         </div>
       </div>
@@ -241,23 +287,30 @@ function TicketModal({ booking, onClose }) {
   );
 }
 
-
 /* =========================
      STATUS BADGE
 ========================= */
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, isHistory }) {
   if (status === "cancelled") {
     return (
-      <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full shrink-0">
-        <XCircle size={14} /> Cancelled
+      <span className="flex items-center gap-1 bg-red-100 text-red-600 text-[10px] font-bold uppercase px-2 py-1 rounded-full shrink-0">
+        <XCircle size={12} /> Cancelled
+      </span>
+    );
+  }
+
+  if (isHistory) {
+    return (
+      <span className="flex items-center gap-1 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase px-2 py-1 rounded-full shrink-0">
+        <CheckCircle size={12} /> Completed
       </span>
     );
   }
 
   return (
-    <span className="flex items-center gap-1 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full shrink-0">
-      <CheckCircle size={14} /> Confirmed
+    <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[10px] font-bold uppercase px-2 py-1 rounded-full shrink-0">
+      <CheckCircle size={12} /> Confirmed
     </span>
   );
 }
