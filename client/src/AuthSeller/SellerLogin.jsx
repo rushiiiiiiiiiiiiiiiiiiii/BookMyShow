@@ -46,7 +46,9 @@ export default function SellerLogin() {
         if (res.data.isNewSeller) {
           navigate("/seller/onboard");
         } else {
-          navigate("/seller/dashboard");
+          setTimeout(() => {
+            navigate("/seller/dashboard", { replace: true });
+          }, 500);
         }
       } else {
         toast.succes(res.data.message || "Invalid OTP");

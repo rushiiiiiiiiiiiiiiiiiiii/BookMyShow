@@ -1,42 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-
+import React from 'react'
 export default function SellerProtectedRoute({ children }) {
-  const [status, setStatus] = useState({
-    loading: true,
-    ok: false,
-  });
+  const [state, setState] = useState({ loading: true, ok: false });
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch(
-          "https://bookmyshow-backend-mzd2.onrender.com/api/seller/me",
-          {
-            credentials: "include",
-          },
-        );
-
-        const data = await res.json();
-
-        if (data.ok) {
-          setStatus({ loading: false, ok: true });
-        } else {
-          setStatus({ loading: false, ok: false });
-        }
-      } catch {
-        setStatus({ loading: false, ok: false });
-      }
-    }
-
-    checkAuth();
+    fetch("https://bookmyshow-backend-mzd2.onrender.com/api/seller/me", {
+      credentials: "include",
+    })
+      .then(res => res.json())
+      .then(data => setState({ loading: false, ok: data.ok }))
+      .catch(() => setState({ loading: false, ok: false }));
   }, []);
 
-  if (status.loading) return null;
-
-  if (!status.ok) {
-    return <Navigate to="/seller/signin" replace />;
-  }
+  if (state.loading) return null;
+  if (!state.ok) return <Navigate to="/seller/signin" replace />;
 
   return children;
 }
